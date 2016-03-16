@@ -1,0 +1,5 @@
+TotalRaces = 4
+Race_0 = FagRace
+Race_1 = LVAirRace
+Race_2 = BMX
+Race_3 = NRG
