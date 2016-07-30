@@ -1,4 +1,4 @@
-# [ByFly GTA: SA GangWar](http://forum.sa-mp.com/showthread.php?t=602775)
+﻿# [ByFly GTA: SA GangWar](http://forum.sa-mp.com/showthread.php?t=602775)
 
 ###### This gamemode in Russian.
 
@@ -80,7 +80,7 @@
 
 ##Зависимости
 Для работы мода требуются:
-* [mxINI](http://forum.sa-mp.com/showthread.php?t=111746&langid=4)
+* [mxINI](https://github.com/Open-GTO/mxINI)
 * [GetVehicleColor](http://forum.sa-mp.com/showthread.php?t=235398)
 
 Все нужные библиотеки в архиве с модом.
