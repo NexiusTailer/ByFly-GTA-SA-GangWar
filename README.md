@@ -66,7 +66,7 @@
 * Anti-Weapon Hack
 * Anti-Tuning Hack
 * Antt-Dialog Hack
-* Anti-Hight ping
+* Anti-High ping
 * Anti-Money Hack
 * Anti-Spawn kill
 * Anti-Rcon Hack
