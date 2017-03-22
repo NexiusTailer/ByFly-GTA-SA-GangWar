@@ -78,7 +78,7 @@
 * Anti-Swear
 * Anti-Flood
 
-##Зависимости
+## Зависимости
 Для работы мода требуются:
 * [mxINI](https://github.com/Open-GTO/mxINI)
 * [GetVehicleColor](http://forum.sa-mp.com/showthread.php?t=235398)
