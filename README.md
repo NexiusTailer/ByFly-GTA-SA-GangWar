@@ -93,7 +93,7 @@
 5. В scriptfiles\Users\[ваш никнейм].ini измените значение Admin на 10
 
 ## Баги
-Пока не обнаружены. Если нашли - напишите мне о них.
+См. раздел [Issues](https://github.com/NexiusTailer/ByFly-GTA-SA-GangWar/issues). Если нашли - напишите мне о них.
 
 ## Благодарности
 Magic_York за советы и помощь
