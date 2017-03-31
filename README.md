@@ -92,9 +92,6 @@
 4. Запустите сервер, зайдите на него и зарегистрируйтесь, потом выйдите
 5. В scriptfiles\Users\[ваш никнейм].ini измените значение Admin на 10
 
-## Баги
-См. раздел [Issues](https://github.com/NexiusTailer/ByFly-GTA-SA-GangWar/issues). Если нашли - напишите мне о них.
-
 ## Благодарности
 Magic_York за советы и помощь
 Magic_York, Andrew_York, TheHero, HeavenX, Eduard_Stream, Zoopi, Unisheld, KailloN за помощь в тесте
