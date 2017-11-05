@@ -67,7 +67,7 @@
 * Anti-Advertising
 * Anti-Weapon Hack
 * Anti-Tuning Hack
-* Antt-Dialog Hack
+* Anti-Dialog Hack
 * Anti-High ping
 * Anti-Money Hack
 * Anti-Spawn kill
