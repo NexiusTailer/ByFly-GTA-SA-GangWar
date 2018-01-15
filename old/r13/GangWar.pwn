@@ -7,7 +7,7 @@
 								Original: Lethal
 
 								Modified by Nexius
-										r14
+										r13
 
 ==============================================================================*/
 
@@ -2125,7 +2125,6 @@ public OnPlayerConnect(playerid)
 			case 'A'..'Z', 'a'..'z', '[', ']', '_':{}
 			default:
 			{
-				printf("Игрок %s кикнут за использование запрещённых символов в нике", PlayerInfo[playerid][pName]);
 				SendClientMessage(playerid, COLOR_GREEN, "Nickname must have only 'Aa'..'Zz', '[', ']' and '_' characters");
 				return Kick2(playerid);
 			}
@@ -2136,7 +2135,6 @@ public OnPlayerConnect(playerid)
 		format(string, sizeof string, "Users/%s.ini", PlayerInfo[playerid][pName]);
 		if(!fexist(string))
 		{
-			printf("Игрок %s забанен за попытку войти с ником администрации", PlayerInfo[playerid][pName]);
 			SendClientMessage(playerid, COLOR_RED, "Вы не администратор сервера!");
 			Ban2(playerid);
 			return 1;
@@ -2149,7 +2147,6 @@ public OnPlayerConnect(playerid)
 			ini_closeFile(iniFile);
 			if(admin < 1)
 			{
-				printf("Игрок %s забанен за попытку войти с ником администрации", PlayerInfo[playerid][pName]);
 				SendClientMessage(playerid, COLOR_RED, "Вы не администратор сервера!");
 				Ban2(playerid);
 				return 1;
@@ -2158,11 +2155,7 @@ public OnPlayerConnect(playerid)
 	}
 	static connecting_ip[16];
 	GetPlayerIp(playerid, connecting_ip, sizeof connecting_ip);
-	if(GetNumberOfPlayersOnThisIP(connecting_ip) > MAX_CONNECTIONS_FROM_IP)
-	{
-		printf("Игрок %s кикнут за несколько одновременных подключений с одного IP-адреса", PlayerInfo[playerid][pName]);
-		return Kick2(playerid);
-	}
+	if(GetNumberOfPlayersOnThisIP(connecting_ip) > MAX_CONNECTIONS_FROM_IP) return Kick2(playerid);
 	format(string, sizeof string, "Welcome To ~n~~g~Los Santos ~n~~r~Gang War ~n~~y~%s!", PlayerInfo[playerid][pName]);
 	GameTextForPlayer(playerid, string, 4500, 1);
 	PlayerPlaySound(playerid, 1097, 0.0, 0.0, 0.0);
@@ -2410,7 +2403,6 @@ public OnPlayerSpawn(playerid)
 	if(!PlayerInfo[playerid][pLogged])
 	{
 		static string[145];
-		printf("Игрок %s кикнут за спавн без авторизации", PlayerInfo[playerid][pName]);
 		format(string, sizeof string, "%s(ID: %d) был кикнут [Необходимо залогиниться]", PlayerInfo[playerid][pName], playerid);
 		SendClientMessageToAll(COLOR_GRAY, string);
 		SetPlayerHealth(playerid, 0.0);
@@ -3074,7 +3066,6 @@ public OnPlayerDeath(playerid, killerid, reason)
 			SetPlayerScore(killerid, PlayerInfo[killerid][pKills]);
 			if(++PlayerInfo[killerid][pTeamKills] > MAX_TEAMKILLS)
 			{
-				printf("Игрок %s кикнут за Team Kill", PlayerInfo[killerid][pName]);
 				format(string, sizeof string, "***[ %s ] был кикнут за Тим атаку или Тим кил]", PlayerInfo[killerid][pName]);
 				SendClientMessageToAll(COLOR_GRAY, string);
 				SendClientMessage(killerid, COLOR_GRAY, "Вы были кикнуты за тим-атаку!");
@@ -3091,7 +3082,6 @@ public OnPlayerDeath(playerid, killerid, reason)
 			PlayerInfo[killerid][pKills]++;
 			SetPlayerScore(killerid, PlayerInfo[killerid][pKills]);
 			PlayerInfo[killerid][pMoney] -= 10000;
-			printf("Игрок %s кикнут за Drive-By", PlayerInfo[killerid][pName]);
 			format(string, sizeof string, "***[ %s ] был кикнут за ДБ!!!", PlayerInfo[killerid][pName]);
 			SendClientMessageToAll(-1, string);
 			Kick2(killerid);
@@ -3165,7 +3155,6 @@ public OnPlayerText(playerid, text[])
 		PlayerInfo[playerid][pFloodCount]++;
 		if(PlayerInfo[playerid][pFloodCount] >= 3)
 		{
-			printf("Игрок %s кикнут за спам в чате", PlayerInfo[playerid][pName]);
 			format(string, sizeof string, "%s(ID: %d) был кикнут. Причина: Спам", PlayerInfo[playerid][pName], playerid);
 			SendClientMessageToAll(COLOR_BORDO, string);
 			Kick2(playerid);
@@ -3177,7 +3166,6 @@ public OnPlayerText(playerid, text[])
 	}
 	if(CheckAnyIP(text))
 	{
-		printf("Игрок %s забанен за рекламу в чате", PlayerInfo[playerid][pName]);
 		format(string, sizeof string, "SERVER: %s(%d) забанен на сервере. Причина: реклама", PlayerInfo[playerid][pName], playerid);
 		SendClientMessageToAll(COLOR_BORDO, string);
 		Ban2(playerid);
@@ -3237,7 +3225,6 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		PlayerInfo[playerid][pFloodCount]++;
 		if(PlayerInfo[playerid][pFloodCount] >= 3)
 		{
-			printf("Игрок %s кикнут за спам командами", PlayerInfo[playerid][pName]);
 			format(string, sizeof string, "%s(ID: %d) был кикнут. Причина: Спам", PlayerInfo[playerid][pName], playerid);
 			SendClientMessageToAll(COLOR_BORDO, string);
 			Kick2(playerid);
@@ -3835,7 +3822,6 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		new pos = strfind(cmdtext, " ", true, 4) + 1;
 		if(CheckAnyIP(cmdtext[pos]))
 		{
-			printf("Игрок %s забанен за рекламу в PM", PlayerInfo[playerid][pName]);
 			format(string, sizeof string, "SERVER: %s(%d) забанен на сервере. Причина: реклама в PM", PlayerInfo[playerid][pName], playerid);
 			SendClientMessageToAll(COLOR_BORDO, string);
 			Ban2(playerid);
@@ -4814,11 +4800,10 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(GetPlayerAdmin(player) > GetPlayerAdmin(playerid)) return SendClientMessage(playerid, COLOR_BORDO, "Вы не можете применить это действие к данному игроку!");
 		tmp = strtok(cmdtext, idx);
 		if(!tmp[0]) return SendClientMessage(playerid, COLOR_RED, "Используйте: /warn [id] [причина]");
-		PlayerInfo[player][pWarns]++;
-		printf("Админ %s предупредил игрока %s (%d/3)", PlayerInfo[playerid][pName], PlayerInfo[player][pName], PlayerInfo[player][pWarns]);
-		format(string, sizeof string, "***Администратор %s предупредил игрока %s по причине %s (Всего причин: %d/3)***", PlayerInfo[playerid][pName], PlayerInfo[player][pName], cmdtext[strfind(cmdtext, " ", true, 6) + 1], PlayerInfo[player][pWarns]);
+		printf("Админ %s предупредил игрока %s", PlayerInfo[playerid][pName], PlayerInfo[player][pName]);
+		format(string, sizeof string, "***Администратор %s предупредил игрока %s по причине %s (Всего причин: %d/3)***", PlayerInfo[playerid][pName], PlayerInfo[player][pName], cmdtext[strfind(cmdtext, " ", true, 6) + 1], PlayerInfo[player][pWarns] + 1);
 		SendClientMessageToAll(COLOR_YELLOW, string);
-		if(PlayerInfo[player][pWarns] >= 3) Kick2(player);
+		if(++PlayerInfo[player][pWarns] >= 3) Kick2(player);
 		return 1;
 	}
 	if(!strcmp(cmd, "/kick", true))
@@ -5385,9 +5370,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		new pname[MAX_PLAYER_NAME];
 		strmid(pname, cmdtext, 11, strlen(cmdtext));
 		format(string, sizeof string, "Users/%s.ini", pname);
-		new ret = SetPlayerName(player, pname);
-		if(fexist(string) || ret == 0) return SendClientMessage(playerid, COLOR_RED, "Данный ник уже кем-то занят!");
-		if(ret == -1) return SendClientMessage(playerid, COLOR_RED, "Данный ник имеет недопустимые символы!");
+		if(fexist(string)) return SendClientMessage(playerid, COLOR_RED, "Данный ник уже кем-то занят!");
 		new iniFile = ini_createFile(string);
 		if(iniFile >= INI_OK)
 		{
@@ -5401,6 +5384,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		SendClientMessage(player, COLOR_BLUE, string);
 		format(string, sizeof string, "Users/%s.ini", PlayerInfo[player][pName]);
 		fremove(string);
+		SetPlayerName(player, pname);
 		GetPlayerName(player, PlayerInfo[player][pName], MAX_PLAYER_NAME);
 		SaveAccount(player);
 		return 1;
@@ -5844,7 +5828,6 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				{
 					if(++PlayerInfo[playerid][pPassCount] >= MAX_PASSWORD_ATTEMPTS)
 					{
-						printf("Игрок %s кикнут за ввод неверного пароля", PlayerInfo[playerid][pName]);
 						format(string, sizeof string, "%s(ID: %d) был кикнут [3/3 раз ввёл неверный пароль]", PlayerInfo[playerid][pName], playerid);
 						SendClientMessageToAll(COLOR_GRAY, string);
 						Kick2(playerid);
@@ -5910,18 +5893,13 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					else SendClientMessage(playerid, COLOR_LIME, "АККАУНТ: Вы успешно залогинились");
 				}
 			}
-			else
-			{
-				printf("Игрок %s кикнут за отклонение авторизации", PlayerInfo[playerid][pName]);
-				Kick2(playerid);
-			}
+			else Kick2(playerid);
 		}
 		case DIALOG_RULES:
 		{
 			if(PlayerInfo[playerid][pLogged]) return 1;
 			if(!response)
 			{
-				printf("Игрок %s кикнут за несогласие с правилами сервера", PlayerInfo[playerid][pName]);
 				format(string, sizeof string, "%s(ID: %d) был кикнут за несогласие с правилами сервера!", PlayerInfo[playerid][pName], playerid);
 				SendClientMessageToAll(COLOR_GRAY, string);
 				Kick2(playerid);
@@ -8308,11 +8286,7 @@ public OnRconLoginAttempt(ip[], password[], success)
 			if(IsPlayerConnected(i))
 			{
 				GetPlayerIp(i, ips, sizeof ips);
-				if(!strcmp(ip, ips, true))
-				{
-					printf("Игрок %s кикнут за ввод неправильного RCON пароля", PlayerInfo[i][pName]);
-					return Kick(i);
-				}
+				if(!strcmp(ip, ips, true)) return Kick(i);
 			}
 		}
 	}
@@ -8900,7 +8874,6 @@ fpublic UpdateTimer()
 				else AveragePing = floatround((AveragePing + temp) / 2);
 				if(temp > MaxPing)
 				{
-					printf("Игрок %s кикнут за высокий пинг (%d)", PlayerInfo[i][pName], temp);
 					format(string, sizeof string, "%s кикнут с сервера. (Причина: Высокий пинг (%d) | В среднем (%d) | Максимальный (%d))", PlayerInfo[i][pName], temp, AveragePing, MaxPing);
 					SendClientMessageToAll(COLOR_GRAY, string);
 					Kick2(i);
@@ -8913,7 +8886,6 @@ fpublic UpdateTimer()
 				{
 					GetWeaponName(temp, string2, sizeof string2);
 					LowerToUpper(string2);
-					printf("Игрок %s забанен за CHEAT %s", PlayerInfo[i][pName], string2);
 					format(string, sizeof string, "Игрок %s(ID: %d) забанен за CHEAT %s!", PlayerInfo[i][pName], i, string2);
 					SendClientMessageToAll(COLOR_BORDO, string);
 					Ban2(i);
@@ -8921,14 +8893,12 @@ fpublic UpdateTimer()
 			}
 			if(GetPlayerState(i) == PLAYER_STATE_DRIVER && GetPlayerSpeed(i, false) > 350)
 			{
-				printf("Игрок %s забанен за SpeedHack", PlayerInfo[i][pName]);
 				format(string, sizeof string, "Игрок %s(ID: %d) забанен за SpeedHack!", PlayerInfo[i][pName], i);
 				SendClientMessageToAll(COLOR_BORDO, string);
 				Ban2(i);
 			}
 			if(1538 <= GetPlayerAnimationIndex(i) <= 1544 && GetPlayerSpeed(i, true) > 50)
 			{
-				printf("Игрок %s кикнут за FlyHack", PlayerInfo[i][pName]);
 				format(string, sizeof string, "Игрок %s(ID: %d) кикнут за FlyHack!", PlayerInfo[i][pName], i);
 				SendClientMessageToAll(COLOR_BORDO, string);
 				Kick2(i);
@@ -8937,7 +8907,6 @@ fpublic UpdateTimer()
 			{
 				if(PlayerInfo[i][pAFKTime] - 3 >= 600)
 				{
-					printf("Игрок %s кикнут за длительное пребывание в AFK", PlayerInfo[i][pName]);
 					format(string, sizeof string, "*** [ %s ] кикнут за длительное пребывание в АФК.", PlayerInfo[i][pName]);
 					SendClientMessageToAll(COLOR_GRAY, string);
 					Kick2(i);
