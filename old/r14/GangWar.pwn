@@ -7,7 +7,7 @@
 								Original: Lethal
 
 								Modified by Nexius
-										r15
+										r14
 
 ==============================================================================*/
 
@@ -9870,21 +9870,22 @@ strfuzzyfind(const string[], const sub[], pos = 0, &start = -1, &end = -1)
 CheckDialogColor(text[])
 {
 	if(strlen(text) < 8) return 0;
-	new i, j;
+	new i, j, bool:remove;
 	do
 	{
 		if(text[i] == '{' && strlen(text[i]) >= 7 && text[i + 7] == '}')
 		{
-			for(j = i + 1; j < i + 7; j++)
+			remove = true;
+			for(j = i + 1; j < 7; j++)
 			{
 				if(!('A' <= text[j] <= 'F' || 'a' <= text[j] <= 'f' || '0' <= text[j] <= '9'))
 				{
 					i += 8;
-					j = -1;
+					remove = false;
 					break;
 				}
 			}
-			if(j != -1) strdel(text, i, i + 8);
+			if(remove) strdel(text, i, i + 8);
 		}
 		else if(text[i] == '}' && i >= 7 && text[i - 7] == '{') i -= 7;
 		else i++;
