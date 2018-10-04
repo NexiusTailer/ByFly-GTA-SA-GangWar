@@ -4,13 +4,13 @@
 
    ------------------------------------------
 
-    Самый быстрый INI ридер/райтер ( mxINI )
+    Самый быстрый INI-ридер/райтер ( mxINI )
 
    ------------------
 
 
     ЧТО ЭТО
-        - Это инклуд-файл для PAWN скриптов мультиплеера GTA San Andreas (SA-MP)
+        - Это инклуд-файл для PAWN-скриптов мультиплеера GTA San Andreas (SA-MP)
 
     КАК ИСПОЛЬЗОВАТЬ
         - Поместить этот файл в папку include, которая лежит рядом с компилятором
@@ -20,7 +20,7 @@
          MX_Master
 
     ВЕРСИЯ
-        0.5.2 от 10.07.2016 (основано на 0.5 от 20.09.2010)
+        0.5.3 от 01.10.2018 (основано на 0.5 от 20.09.2010)
 
 
     ДОСТУПНЫЕ ИНСТРУМЕНТЫ
@@ -97,10 +97,18 @@ const
     // настройки
 
     // РЕКОМЕНДУЕТСЯ ИЗМЕНИТЬ ПОД СЕБЯ
-    INI_MAX_OPENED_FILES    = 2,        // максимум, открытых одновременно, файлов
+#if !defined INI_MAX_OPENED_FILES
+    INI_MAX_OPENED_FILES    = 2,        // максимум открытых одновременно файлов
+#endif
+#if !defined INI_MAX_FILE_SIZE
     INI_MAX_FILE_SIZE       = 65536,    // байт,        макс. размер файла
+#endif
+#if !defined INI_MAX_FILENAME_SIZE
     INI_MAX_FILENAME_SIZE   = 128,      // символов,    макс. размер пути к файлу
+#endif
+#if !defined INI_MAX_KEYS_IN_FILE
     INI_MAX_KEYS_IN_FILE    = 2048,     // максимум ключей в открытом файле
+#endif
 
     // в ОЗУ будет выделено для временного хранения файлов примерно вот столько байт:
     // INI_MAX_OPENED_FILES * ( INI_MAX_FILE_SIZE + INI_MAX_FILENAME_SIZE*4 + INI_MAX_KEYS_IN_FILE*4 )
@@ -146,7 +154,7 @@ const
 // списки разных символов для оператора case в одной из функций
 
 // РЕКОМЕНДУЕТСЯ НЕ ИЗМЕНЯТЬ
-#define INI_SPACE_CHAR  ' ', '\t'                       // строковые пробельные символы
+#define INI_SPACE_CHARS ' ', '\t'                       // строковые пробельные символы
 #define INI_KEY_STARTS  ' ', '\t', '\r', '\n', '\0'     // символы, перед началом ключа
 #define INI_STRING_ENDS '\r', '\n', '\0'                // символы, завершающие значение
 #define INI_NUMBER_ENDS ' ', '\t', '\r', '\n', '\0'     // символы, завершающие численное значение
@@ -205,7 +213,7 @@ static stock
         код ошибки < 0 или ИД_открытого_файла
 */
 
-stock ini_createFile ( szFilePath[], szDefaultContent[] = "" )
+stock ini_createFile ( const szFilePath[], const szDefaultContent[] = "" )
 {
     //
     //  несколько блоков с проверками
@@ -323,7 +331,7 @@ stock ini_createFile ( szFilePath[], szDefaultContent[] = "" )
         код ошибки < 0 или ИД_открытого_файла
 */
 
-stock ini_openFile ( szFilePath[] )
+stock ini_openFile ( const szFilePath[] )
 {
     //
     //  несколько блоков с проверками
@@ -535,7 +543,7 @@ stock ini_closeFile ( nFilePointer )
         код ошибки < 0 или 0 при успехе
 */
 
-stock ini_getString ( nFilePointer, szKeyName[], szReturnValue[], nSizeOfReturn = sizeof(szReturnValue) )
+stock ini_getString ( nFilePointer, const szKeyName[], szReturnValue[], nSizeOfReturn = sizeof(szReturnValue) )
 {
     // ----------------
     if // если ИД открытого файла указан неверно
@@ -580,7 +588,7 @@ stock ini_getString ( nFilePointer, szKeyName[], szReturnValue[], nSizeOfReturn 
         {
             switch ( _ini_szFileContent[nFilePointer]{curFilePos} ) // узнаем что за символ в текущ. поз. файла
             {
-                case INI_SPACE_CHAR :           continue; // если это пробельный символ, перейдем к пред. символу файла
+                case INI_SPACE_CHARS :          continue; // если это пробельный символ, перейдем к пред. символу файла
                 case INI_STRING_DELIMITER :     break; // если это конец строки
                 default : // если это другой символ
                 {
@@ -636,7 +644,7 @@ stock ini_getString ( nFilePointer, szKeyName[], szReturnValue[], nSizeOfReturn 
 
                 switch ( _ini_szFileContent[nFilePointer]{curFilePos} )
                 {
-                    case INI_SPACE_CHAR :   continue; // если это пробельный символ, перейдем к след. символу
+                    case INI_SPACE_CHARS :  continue; // если это пробельный символ, перейдем к след. символу
                     default :               break; // если это другой символ
                 }
             }
@@ -702,7 +710,7 @@ stock ini_getString ( nFilePointer, szKeyName[], szReturnValue[], nSizeOfReturn 
         код ошибки < 0 или 0 при успехе
 */
 
-stock ini_getInteger ( nFilePointer, szKeyName[], & nReturnValue )
+stock ini_getInteger ( nFilePointer, const szKeyName[], & nReturnValue )
 {
     // ----------------
     if // если ИД открытого файла указан неверно
@@ -743,7 +751,7 @@ stock ini_getInteger ( nFilePointer, szKeyName[], & nReturnValue )
         {
             switch ( _ini_szFileContent[nFilePointer]{curFilePos} ) // узнаем что за символ в текущ. поз. файла
             {
-                case INI_SPACE_CHAR :           continue; // если это пробельный символ, перейдем к пред. символу файла
+                case INI_SPACE_CHARS :          continue; // если это пробельный символ, перейдем к пред. символу файла
                 case INI_STRING_DELIMITER :     break; // если это конец строки
                 default : // если это другой символ
                 {
@@ -799,7 +807,7 @@ stock ini_getInteger ( nFilePointer, szKeyName[], & nReturnValue )
 
                 switch ( _ini_szFileContent[nFilePointer]{curFilePos} )
                 {
-                    case INI_SPACE_CHAR :   continue; // если это пробельный символ, перейдем к след. символу
+                    case INI_SPACE_CHARS :  continue; // если это пробельный символ, перейдем к след. символу
                     default :               break; // если это другой символ
                 }
             }
@@ -869,7 +877,7 @@ stock ini_getInteger ( nFilePointer, szKeyName[], & nReturnValue )
         код ошибки < 0 или 0 при успехе
 */
 
-stock ini_getFloat ( nFilePointer, szKeyName[], & Float: fReturnValue )
+stock ini_getFloat ( nFilePointer, const szKeyName[], & Float: fReturnValue )
 {
     // ----------------
     if // если ИД открытого файла указан неверно
@@ -910,7 +918,7 @@ stock ini_getFloat ( nFilePointer, szKeyName[], & Float: fReturnValue )
         {
             switch ( _ini_szFileContent[nFilePointer]{curFilePos} ) // узнаем что за символ в текущ. поз. файла
             {
-                case INI_SPACE_CHAR :           continue; // если это пробельный символ, перейдем к пред. символу файла
+                case INI_SPACE_CHARS :          continue; // если это пробельный символ, перейдем к пред. символу файла
                 case INI_STRING_DELIMITER :     break; // если это конец строки
                 default : // если это другой символ
                 {
@@ -966,7 +974,7 @@ stock ini_getFloat ( nFilePointer, szKeyName[], & Float: fReturnValue )
 
                 switch ( _ini_szFileContent[nFilePointer]{curFilePos} )
                 {
-                    case INI_SPACE_CHAR :   continue; // если это пробельный символ, перейдем к след. символу
+                    case INI_SPACE_CHARS :  continue; // если это пробельный символ, перейдем к след. символу
                     default :               break; // если это другой символ
                 }
             }
@@ -1044,7 +1052,7 @@ stock ini_getFloat ( nFilePointer, szKeyName[], & Float: fReturnValue )
         код ошибки < 0 или 0 при успехе
 */
 
-stock ini_setString ( nFilePointer, szKeyName[], szKeyValue[] )
+stock ini_setString ( nFilePointer, const szKeyName[], const szKeyValue[] )
 {
     // ----------------
     if // если ИД открытого файла указан неверно
@@ -1085,7 +1093,7 @@ stock ini_setString ( nFilePointer, szKeyName[], szKeyValue[] )
         {
             switch ( _ini_szFileContent[nFilePointer]{curFilePos} ) // узнаем что за символ в текущ. поз. файла
             {
-                case INI_SPACE_CHAR :           continue; // если это пробельный символ, перейдем к пред. символу файла
+                case INI_SPACE_CHARS :          continue; // если это пробельный символ, перейдем к пред. символу файла
                 case INI_STRING_DELIMITER :     break; // если это конец строки
                 default : // если это другой символ
                 {
@@ -1140,7 +1148,7 @@ stock ini_setString ( nFilePointer, szKeyName[], szKeyValue[] )
 
                 switch ( _ini_szFileContent[nFilePointer]{curFilePos} )
                 {
-                    case INI_SPACE_CHAR :   continue; // если это пробельный символ, перейдем к след. символу
+                    case INI_SPACE_CHARS :  continue; // если это пробельный символ, перейдем к след. символу
                     default :               break; // если это другой символ
                 }
             }
@@ -1330,7 +1338,7 @@ stock ini_setString ( nFilePointer, szKeyName[], szKeyValue[] )
         код ошибки < 0 или 0 при успехе
 */
 
-stock ini_setInteger ( nFilePointer, szKeyName[], nKeyValue )
+stock ini_setInteger ( nFilePointer, const szKeyName[], nKeyValue )
 {
     // ----------------
     if // если ИД открытого файла указан неверно
@@ -1371,7 +1379,7 @@ stock ini_setInteger ( nFilePointer, szKeyName[], nKeyValue )
         {
             switch ( _ini_szFileContent[nFilePointer]{curFilePos} ) // узнаем что за символ в текущ. поз. файла
             {
-                case INI_SPACE_CHAR :           continue; // если это пробельный символ, перейдем к пред. символу файла
+                case INI_SPACE_CHARS :          continue; // если это пробельный символ, перейдем к пред. символу файла
                 case INI_STRING_DELIMITER :     break; // если это конец строки
                 default : // если это другой символ
                 {
@@ -1426,7 +1434,7 @@ stock ini_setInteger ( nFilePointer, szKeyName[], nKeyValue )
 
                 switch ( _ini_szFileContent[nFilePointer]{curFilePos} )
                 {
-                    case INI_SPACE_CHAR :   continue; // если это пробельный символ, перейдем к след. символу
+                    case INI_SPACE_CHARS :  continue; // если это пробельный символ, перейдем к след. символу
                     default :               break; // если это другой символ
                 }
             }
@@ -1628,7 +1636,7 @@ stock ini_setInteger ( nFilePointer, szKeyName[], nKeyValue )
         код ошибки < 0 или 0 при успехе
 */
 
-stock ini_setFloat ( nFilePointer, szKeyName[], Float: fKeyValue )
+stock ini_setFloat ( nFilePointer, const szKeyName[], Float: fKeyValue )
 {
     // ----------------
     if // если ИД открытого файла указан неверно
@@ -1669,7 +1677,7 @@ stock ini_setFloat ( nFilePointer, szKeyName[], Float: fKeyValue )
         {
             switch ( _ini_szFileContent[nFilePointer]{curFilePos} ) // узнаем что за символ в текущ. поз. файла
             {
-                case INI_SPACE_CHAR :           continue; // если это пробельный символ, перейдем к пред. символу файла
+                case INI_SPACE_CHARS :          continue; // если это пробельный символ, перейдем к пред. символу файла
                 case INI_STRING_DELIMITER :     break; // если это конец строки
                 default : // если это другой символ
                 {
@@ -1724,7 +1732,7 @@ stock ini_setFloat ( nFilePointer, szKeyName[], Float: fKeyValue )
 
                 switch ( _ini_szFileContent[nFilePointer]{curFilePos} )
                 {
-                    case INI_SPACE_CHAR :   continue; // если это пробельный символ, перейдем к след. символу
+                    case INI_SPACE_CHARS :  continue; // если это пробельный символ, перейдем к след. символу
                     default :               break; // если это другой символ
                 }
             }
@@ -1923,7 +1931,7 @@ stock ini_setFloat ( nFilePointer, szKeyName[], Float: fKeyValue )
         код ошибки < 0 или 0 при успехе
 */
 
-stock ini_removeKey ( nFilePointer, szKeyName[] )
+stock ini_removeKey ( nFilePointer, const szKeyName[] )
 {
     // ----------------
     if // если ИД открытого файла указан неверно
@@ -1964,7 +1972,7 @@ stock ini_removeKey ( nFilePointer, szKeyName[] )
         {
             switch ( _ini_szFileContent[nFilePointer]{curFilePos} ) // узнаем что за символ в текущ. поз. файла
             {
-                case INI_SPACE_CHAR :           continue; // если это пробельный символ, перейдем к пред. символу файла
+                case INI_SPACE_CHARS :          continue; // если это пробельный символ, перейдем к пред. символу файла
                 case INI_STRING_DELIMITER :     break; // если это конец строки
                 default : // если это другой символ
                 {
@@ -2023,7 +2031,7 @@ stock ini_removeKey ( nFilePointer, szKeyName[] )
 
                 switch ( _ini_szFileContent[nFilePointer]{curFilePos} )
                 {
-                    case INI_SPACE_CHAR :   continue; // если это пробельный символ, перейдем к след. символу
+                    case INI_SPACE_CHARS :  continue; // если это пробельный символ, перейдем к след. символу
                     default :               break; // если это другой символ
                 }
             }
@@ -2124,25 +2132,21 @@ stock ini_removeKey ( nFilePointer, szKeyName[] )
 
 stock ini_getErrorInfo ( nErrorCode )
 {
-    new error_ms[200] = "Ошибок нет";
-
-    if ( nErrorCode >= 0 ) return error_ms;
+    if ( nErrorCode >= 0 ) return "Ошибок нет";
 
     switch ( nErrorCode )
     {
-        case INI_FILE_NOT_FOUND :     error_ms = "INI файл, указанный в `ini_openFile`, не существует, возможно, указан неверный путь к нему";
-        case INI_FILE_ALREADY_EXIST : error_ms = "INI файл, указанный в `ini_createFile`, уже существует, укажите другое имя/путь к файлу";
-        case INI_TOO_LARGE_FILE :     error_ms = "Невозможно добавить новый ключ в INI файл, т.к. размер INI файла превысит допустимый лимит в " #INI_MAX_FILE_SIZE " символ(ов), или будет превышен лимит в " #INI_MAX_KEYS_IN_FILE " ключей";
-        case INI_WRONG_PATH_SIZE :    error_ms = "Длина пути к INI файлу, указанного в `ini_openFile` / `ini_createFile`, превышает лимит в " #INI_MAX_FILENAME_SIZE " символ(ов)";
-        case INI_READ_ERROR :         error_ms = "Ошибка при чтении INI файла с диска, возможно, файл занят другим процессом";
-        case INI_WRITE_ERROR :        error_ms = "Ошибка при записи содержимого INI файла на диск, возможно, файл занят другим процессом";
-        case INI_NO_FREE_SLOT :       error_ms = "Лимит в " #INI_MAX_OPENED_FILES " одновременно открытых INI файлов исчерпан, поэтому открыть/создать еще 1 файл нельзя, пока не закрыт хоть 1 из открытых файлов";
-        case INI_WRONG_SLOT :         error_ms = "Указан неверный ID открытого INI файла, возможно, при открытии INI файла произошла ошибка, поэтому вместо ID файла вы получили код ошибки";
-        case INI_KEY_NOT_FOUND :      error_ms = "Указанный ключ не найден в открытом INI файле";
-        case INI_WRONG_RETURN_SIZE :  error_ms = "При попытке чтения строкового значения из INI файла, последний параметр `nSizeOfReturn` в `ini_getString` оказался <= 0, укажите вручную значение > 0 для него";
-
-        default:                      error_ms = "Неизвестная ошибка";
+        case INI_FILE_NOT_FOUND :     return "INI файл, указанный в `ini_openFile`, не существует, возможно, указан неверный путь к нему";
+        case INI_FILE_ALREADY_EXIST : return "INI файл, указанный в `ini_createFile`, уже существует, укажите другое имя/путь к файлу";
+        case INI_TOO_LARGE_FILE :     return "Невозможно добавить новый ключ в INI файл, т.к. размер INI файла превысит допустимый лимит в " #INI_MAX_FILE_SIZE " символ(ов), или будет превышен лимит в " #INI_MAX_KEYS_IN_FILE " ключей";
+        case INI_WRONG_PATH_SIZE :    return "Длина пути к INI файлу, указанного в `ini_openFile` / `ini_createFile`, превышает лимит в " #INI_MAX_FILENAME_SIZE " символ(ов)";
+        case INI_READ_ERROR :         return "Ошибка при чтении INI файла с диска, возможно, файл занят другим процессом";
+        case INI_WRITE_ERROR :        return "Ошибка при записи содержимого INI файла на диск, возможно, файл занят другим процессом";
+        case INI_NO_FREE_SLOT :       return "Лимит в " #INI_MAX_OPENED_FILES " одновременно открытых INI файлов исчерпан, поэтому открыть/создать еще 1 файл нельзя, пока не закрыт хоть 1 из открытых файлов";
+        case INI_WRONG_SLOT :         return "Указан неверный ID открытого INI файла, возможно, при открытии INI файла произошла ошибка, поэтому вместо ID файла вы получили код ошибки";
+        case INI_KEY_NOT_FOUND :      return "Указанный ключ не найден в открытом INI файле";
+        case INI_WRONG_RETURN_SIZE :  return "При попытке чтения строкового значения из INI файла, последний параметр `nSizeOfReturn` в `ini_getString` оказался <= 0, укажите вручную значение > 0 для него";
     }
 
-    return error_ms;
+    return "Неизвестная ошибка";
 }
