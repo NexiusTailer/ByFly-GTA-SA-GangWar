@@ -2132,21 +2132,24 @@ stock ini_removeKey ( nFilePointer, const szKeyName[] )
 
 stock ini_getErrorInfo ( nErrorCode )
 {
-    if ( nErrorCode >= 0 ) return "Ошибок нет";
+    new error_ms[200] = "Ошибок нет";
+
+    if ( nErrorCode >= 0 ) return error_ms;
 
     switch ( nErrorCode )
     {
-        case INI_FILE_NOT_FOUND :     return "INI файл, указанный в `ini_openFile`, не существует, возможно, указан неверный путь к нему";
-        case INI_FILE_ALREADY_EXIST : return "INI файл, указанный в `ini_createFile`, уже существует, укажите другое имя/путь к файлу";
-        case INI_TOO_LARGE_FILE :     return "Невозможно добавить новый ключ в INI файл, т.к. размер INI файла превысит допустимый лимит в " #INI_MAX_FILE_SIZE " символ(ов), или будет превышен лимит в " #INI_MAX_KEYS_IN_FILE " ключей";
-        case INI_WRONG_PATH_SIZE :    return "Длина пути к INI файлу, указанного в `ini_openFile` / `ini_createFile`, превышает лимит в " #INI_MAX_FILENAME_SIZE " символ(ов)";
-        case INI_READ_ERROR :         return "Ошибка при чтении INI файла с диска, возможно, файл занят другим процессом";
-        case INI_WRITE_ERROR :        return "Ошибка при записи содержимого INI файла на диск, возможно, файл занят другим процессом";
-        case INI_NO_FREE_SLOT :       return "Лимит в " #INI_MAX_OPENED_FILES " одновременно открытых INI файлов исчерпан, поэтому открыть/создать еще 1 файл нельзя, пока не закрыт хоть 1 из открытых файлов";
-        case INI_WRONG_SLOT :         return "Указан неверный ID открытого INI файла, возможно, при открытии INI файла произошла ошибка, поэтому вместо ID файла вы получили код ошибки";
-        case INI_KEY_NOT_FOUND :      return "Указанный ключ не найден в открытом INI файле";
-        case INI_WRONG_RETURN_SIZE :  return "При попытке чтения строкового значения из INI файла, последний параметр `nSizeOfReturn` в `ini_getString` оказался <= 0, укажите вручную значение > 0 для него";
+        case INI_FILE_NOT_FOUND :     error_ms = "INI файл, указанный в `ini_openFile`, не существует, возможно, указан неверный путь к нему";
+        case INI_FILE_ALREADY_EXIST : error_ms = "INI файл, указанный в `ini_createFile`, уже существует, укажите другое имя/путь к файлу";
+        case INI_TOO_LARGE_FILE :     error_ms = "Невозможно добавить новый ключ в INI файл, т.к. размер INI файла превысит допустимый лимит в " #INI_MAX_FILE_SIZE " символ(ов), или будет превышен лимит в " #INI_MAX_KEYS_IN_FILE " ключей";
+        case INI_WRONG_PATH_SIZE :    error_ms = "Длина пути к INI файлу, указанного в `ini_openFile` / `ini_createFile`, превышает лимит в " #INI_MAX_FILENAME_SIZE " символ(ов)";
+        case INI_READ_ERROR :         error_ms = "Ошибка при чтении INI файла с диска, возможно, файл занят другим процессом";
+        case INI_WRITE_ERROR :        error_ms = "Ошибка при записи содержимого INI файла на диск, возможно, файл занят другим процессом";
+        case INI_NO_FREE_SLOT :       error_ms = "Лимит в " #INI_MAX_OPENED_FILES " одновременно открытых INI файлов исчерпан, поэтому открыть/создать еще 1 файл нельзя, пока не закрыт хоть 1 из открытых файлов";
+        case INI_WRONG_SLOT :         error_ms = "Указан неверный ID открытого INI файла, возможно, при открытии INI файла произошла ошибка, поэтому вместо ID файла вы получили код ошибки";
+        case INI_KEY_NOT_FOUND :      error_ms = "Указанный ключ не найден в открытом INI файле";
+        case INI_WRONG_RETURN_SIZE :  error_ms = "При попытке чтения строкового значения из INI файла, последний параметр `nSizeOfReturn` в `ini_getString` оказался <= 0, укажите вручную значение > 0 для него";
+        default:                      error_ms = "Неизвестная ошибка";
     }
 
-    return "Неизвестная ошибка";
+    return error_ms;
 }

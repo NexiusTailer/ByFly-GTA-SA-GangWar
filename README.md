@@ -1,4 +1,4 @@
-﻿[Download latest release (r15)](https://github.com/NexiusTailer/ByFly-GTA-SA-GangWar/tree/master/gamemodes)
+﻿[Download latest release (r16)](https://github.com/NexiusTailer/ByFly-GTA-SA-GangWar/tree/master/gamemodes)
 
 # [ByFly GTA: SA GangWar](http://forum.sa-mp.com/showthread.php?t=602775)
 

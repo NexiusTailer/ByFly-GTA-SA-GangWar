@@ -7,7 +7,7 @@
 								Original: Lethal
 
 								Modified by Nexius
-										r15
+										r16
 
 ==============================================================================*/
 
@@ -168,34 +168,31 @@
 
 #define MAX_GANGS				512
 #define MAX_PASSWORD_LENGTH		32
+
 #define PVP_WORLD				1000
 
 #define MAX_CONNECTIONS_FROM_IP		3
 #define MAX_PASSWORD_ATTEMPTS		3
 #define MAX_TEAMKILLS				3
-#define REOWN_TURF					4
-#define GANGAREA_TAKE				4
-#define GANGAREA_WARNINGS			2
 
-#define MAX_RACES						100
-#define MAX_RACE_CHECKPOINTS_EACH_RACE	124
-#define COUNT_DOWN_TILL_RACE_START		30
-#define MAX_RACE_TIME					300
-#define RACE_CHECKPOINT_SIZE			12.0
+#define KILLS_FOR_REOWN_TURF		4
+#define KILLS_FOR_GANGAREA_TAKE		4
+#define KILLS_FOR_GANGAREA_WARNING	2
 
-#define ELEVATOR_SPEED		5.0
-#define DOORS_SPEED			5.0
-#define ELEVATOR_WAIT_TIME	5000
-#define X_DOOR_CLOSED		1786.6276
-#define X_DOOR_R_OPENED		1785.0276
-#define X_DOOR_L_OPENED		1788.2276
-#define GROUND_Z_COORD		14.5114
-#define ELEVATOR_OFFSET		0.0595
+#define MAX_RACES					100
+#define MAX_RACE_CP_EACH_RACE		124
+#define COUNTDOWN_TILL_RACE_START	30
+#define MAX_RACE_TIME				300
+#define RACE_CP_SIZE				12.0
 
-#define FERRIS_WHEEL_WAIT_TIME	3000
+#define ELEVATOR_SPEED			5.0
+#define DOORS_SPEED				5.0
+#define ELEVATOR_WAIT_TIME		5000
+
 #define FERRIS_WHEEL_SPEED		0.005
+#define FERRIS_WHEEL_WAIT_TIME	3000
 
-#define JAIL_FOR_SPAWN_KILL		5
+#define SPAWN_KILL_JAIL_TIME	5
 
 #define ConvertTime(%0,%1,%2,%3,%4) \
 	new Float:%0 = floatdiv(%1, 60000.0); \
@@ -519,34 +516,34 @@ RandMsg14[][] =
 	"При покупке оружия будьте внимательны, чтоб потом не возникало глупых вопросов."
 },
 
-Swears[][] =
+BadWords[][] =
 {
 	"сук", "пидор", "пизд", "хуй", "бля", "пидр",
 	"шлюх", "лох", "ебан", "ебал", "чмо"
 },
 
-Carray[] =
+ColorsArray[] =
 {
 	1, 0, 6, 2, 79, 149, 151, 3, 34
 },
 
-Warray[] =
+WheelsArray[] =
 {
 	1073, 1074, 1075, 1076, 1077, 1078, 1079, 1080,
 	1081, 1082, 1083, 1084, 1085, 1096, 1097, 1098
 },
 
-Xarray1[] =
+SpoilersArray[] =
 {
 	1000, 1001, 1002, 1003, 1014, 1015, 1016, 1023
 },
 
-Xarray2[] =
+HoodsArray[] =
 {
 	1004, 1005, 1011, 1012
 },
 
-Xarray3[] =
+LampsArray[] =
 {
 	1013, 1024
 },
@@ -676,7 +673,7 @@ enum pInfo
 	pMoney,
 	pClass,
 	Float:pArmour,
-	pName[MAX_PLAYER_NAME],
+	pName[MAX_PLAYER_NAME + 1],
 	pPass[MAX_PASSWORD_LENGTH],
 	pTempAdmin,
 	pAdmin,
@@ -703,15 +700,15 @@ enum pInfo
 	pPvpPlace,
 	pPassCount,
 	pBattleId,
-	pClicked,
+	pClickedId,
 	pAFKTime,
 	pBanTime,
 	pSeconds,
+	pTempGang,
 	pGangId,
-	pTgang,
 	pSpec,
 	pId,
-	pInDm,
+	pDmZone,
 	pGang,
 	pGangLvl,
 	pGangSkin,
@@ -723,13 +720,13 @@ enum pInfo
 	PlayerText:pMutedTime,
 	pRacePos,
 	pPointsId,
-	pSpikes,
-	pMine[2],
-	pNeon[12],
-	pMinePickup,
-	pCreatedRaceVeh,
+	pSpikesObj,
+	pMineObj[2],
+	pNeonObj[12],
+	pMinePick,
 	pMineStatus,
-	pCPProgess,
+	pCreatedRaceVeh,
+	pRaceCPProgess,
 	pMuteTime,
 	pJailTime,
 	pPunishTime,
@@ -785,22 +782,22 @@ new
 	gMinute,
 	gSecond,
 
-	iGate,
-	iGate2,
-	iGate3,
-	iGate4,
-	VipGates,
+	iGateObj,
+	iGate2Obj,
+	iGate3Obj,
+	iGate4Obj,
+	VipGatesObj,
 
-	Dumper,
-	Hydra1,
-	Hydra2,
-	Panzer,
+	DumperVeh,
+	Hydra1Veh,
+	Hydra2Veh,
+	PanzerVeh,
 	TunVehs[22],
 
-	TPls,
-	TPsf,
-	TPlv,
-	TPChina,
+	TpLSPick,
+	TpSFPick,
+	TpLVPick,
+	TpChinaPick,
 
 	CountTmr,
 	rCounterTmr,
@@ -808,20 +805,20 @@ new
 
 	bool:PvpPlaceVisit[5],
 
-	GangName[MAX_PLAYERS][32],
 	bool:Gang[MAX_GANGS],
-	GPick[MAX_GANGS],
-	Text3D:GLabel[MAX_GANGS],
-	GName[MAX_GANGS][32],
-	GCheck[MAX_GANGS],
-	GColor[MAX_GANGS][10],
-	Float:GSpawn[MAX_GANGS][3],
-	GSpawnInt[MAX_GANGS],
-	bool:GTag[MAX_GANGS],
-	GSkin[MAX_GANGS][7],
-	GDMPoints[MAX_GANGS],
-	GMoney[MAX_GANGS],
-	GKills[MAX_GANGS],
+	GangPick[MAX_GANGS],
+	Text3D:GangLabel[MAX_GANGS],
+	GangTempName[MAX_PLAYERS][32],
+	GangName[MAX_GANGS][32],
+	GangCheck[MAX_GANGS],
+	GangColor[MAX_GANGS][10],
+	Float:GangSpawn[MAX_GANGS][3],
+	GangSpawnInt[MAX_GANGS],
+	bool:GangTag[MAX_GANGS],
+	GangSkin[MAX_GANGS][7],
+	GangDmPoints[MAX_GANGS],
+	GangMoney[MAX_GANGS],
+	GangKills[MAX_GANGS],
 
 	BuildRace,
 	BuildRaceType,
@@ -830,46 +827,45 @@ new
 	BuildName[30],
 	bool:BuildTakeVehPos,
 	BuildVehPosCount,
-	bool:BuildTakeCheckpoints,
-	BuildCheckPointCount,
+	bool:BuildTakeCPs,
+	BuildCPCount,
 	bool:RaceBusy,
 	RaceName[30],
 	RaceVehicle,
 	RaceType,
-	TotalCP,
+	TotalRaceCP,
 	Float:RaceVehCoords[2][4],
-	Float:CPCoords[MAX_RACE_CHECKPOINTS_EACH_RACE][4],
-	Index,
-	PlayersCount[2],
-	CountAmount,
+	Float:RaceCPCoords[MAX_RACE_CP_EACH_RACE][4],
+	RacePlayersCount[2],
+	RaceCountAmount,
 	RaceTick,
 	bool:RaceStarted,
 	bool:RaceChecked,
-	FinishCount,
-	JoinCount,
+	RaceFinishCount,
+	RaceJoinCount,
 	RaceTime,
 	RaceNames[MAX_RACES][64],
 	TotalRaces,
 	bool:AutomaticRace,
-	TimeProgress,
+	RaceTimeProgress,
 
-	ObjElevator,
-	ObjElevatorDoors[2],
-	ObjFloorDoors[21][2],
-	Text3D:LabelElevator,
-	Text3D:LabelFloors[21],
+	ElevatorObj,
+	ElevatorDoorsObj[2],
+	FloorDoorsObj[21][2],
+	Text3D:ElevatorLabel,
+	Text3D:FloorsLabel[21],
 	ElevatorState,
 	ElevatorFloor,
 	ElevatorQueue[21],
 	FloorRequestedBy[21],
 
-	FerrisWheelObjects[12],
+	FerrisWheelObj[12],
 	Float:FerrisWheelAngle,
 	bool:FerrisWheelAlternate,
 
-	Fire,
-	Fire1,
-	Balloon,
+	FireObj,
+	Fire1Obj,
+	BalloonObj,
 	BalloonStage,
 	bool:BalloonIsStarted,
 	Text3D:BalloonLabel,
@@ -880,7 +876,7 @@ new
 	MaxPing = 300,
 	AveragePing,
 
-	Flasher[MAX_VEHICLES],
+	FlasherObj[MAX_VEHICLES],
 
 	RulesStr[2800],
 	RaceCreate3Str[457],
@@ -893,9 +889,9 @@ new
 
 	bool:EarsIsEnabled;
 
-Float:GetElevatorZCoordForFloor(floorid) return (GROUND_Z_COORD + FloorZOffsets[floorid] + ELEVATOR_OFFSET);
+Float:GetElevatorZCoordForFloor(floorid) return (14.5114 + FloorZOffsets[floorid] + 0.0595);
 
-Float:GetDoorsZCoordForFloor(floorid) return (GROUND_Z_COORD + FloorZOffsets[floorid]);
+Float:GetDoorsZCoordForFloor(floorid) return (14.5114 + FloorZOffsets[floorid]);
 
 gw_ShowPlayerDialog(playerid, dialogid, type, header[], text[], button1[], button2[])
 {
@@ -956,14 +952,12 @@ public OnGameModeInit()
 	TextDrawLetterSize(TDLogo, 0.3, 1.0);
 	TextDrawColor(TDLogo, COLOR_RED);
 	TextDrawSetOutline(TDLogo, 1);
-	TextDrawSetProportional(TDLogo, 1);
 
 	TDLogo2 = TextDrawCreate(314.0, 387.0, "Gang War~n~www.gameplanet.by");
 	TextDrawAlignment(TDLogo2, 2);
 	TextDrawBackgroundColor(TDLogo2, 65380);
 	TextDrawLetterSize(TDLogo2, 1.02, 2.2);
 	TextDrawColor(TDLogo2, -65281);
-	TextDrawSetProportional(TDLogo2, 1);
 	TextDrawSetShadow(TDLogo2, 3);
 	TextDrawUseBox(TDLogo2, 1);
 	TextDrawBoxColor(TDLogo2, 65350);
@@ -974,13 +968,11 @@ public OnGameModeInit()
 	TDTime = TextDrawCreate(499.0, 118.0, TimeStr);
 	TextDrawLetterSize(TDTime, 0.3, 1.0);
 	TextDrawBackgroundColor(TDTime, 255);
-	TextDrawSetProportional(TDTime, 1);
 	TextDrawSetOutline(TDTime, 1);
 	TextDrawColor(TDTime, -1);
 	TextDrawFont(TDTime, 3);
 
 	TDAnimHelper = TextDrawCreate(610.0, 400.0, "~r~~k~~PED_SPRINT~ ~w~to stop the animation");
-	TextDrawUseBox(TDAnimHelper, 0);
 	TextDrawFont(TDAnimHelper, 2);
 	TextDrawSetShadow(TDAnimHelper, 0);
 	TextDrawSetOutline(TDAnimHelper, 1);
@@ -1056,10 +1048,10 @@ public OnGameModeInit()
 	Create3DTextLabel("Телепорт", COLOR_BORDO, 1705.9359, 1599.4969, 10.115, 15.0, 0, 1);
 	Create3DTextLabel("Выход", COLOR_BORDO, 1026.668, -1310.2712, -21.0671, 10.0, 0, 1);
 
-	TPls = CreatePickup(1559, 2, 1969.2941, -2186.8699, 13.5469, -1);
-	TPsf = CreatePickup(1559, 2, -1552.7843, -427.2818, 6.0163, -1);
-	TPlv = CreatePickup(1559, 2, 1705.9359, 1599.4969, 10.115, -1);
-	TPChina = CreatePickup(1559, 2, 1026.668, -1310.2712, -21.0671, -1);
+	TpLSPick = CreatePickup(1559, 2, 1969.2941, -2186.8699, 13.5469, -1);
+	TpSFPick = CreatePickup(1559, 2, -1552.7843, -427.2818, 6.0163, -1);
+	TpLVPick = CreatePickup(1559, 2, 1705.9359, 1599.4969, 10.115, -1);
+	TpChinaPick = CreatePickup(1559, 2, 1026.668, -1310.2712, -21.0671, -1);
 
 	AddStaticPickup(1242, 2, 1125.1913, -2017.7397, 69.0078);
 	AddStaticPickup(1242, 2, 2362.7263, -1120.1473, 1050.8826);
@@ -1147,10 +1139,10 @@ public OnGameModeInit()
 	AddStaticPickup(353, 3, 2147.2861, -2265.137, 14.4545);
 	AddStaticPickup(353, 3, 320.7039, -1503.4685, 24.9219);
 
-	Dumper = AddStaticVehicle(406, 2723.81, -2392.658, 15.1371, 180.0, 1, 1);
-	Hydra1 = AddStaticVehicle(520, 1193.8994, -2053.0, 69.9, 270.0, -1, -1);
-	Hydra2 = AddStaticVehicle(520, 1193.7998, -2020.3994, 69.9, 270.0, -1, -1);
-	Panzer = AddStaticVehicle(432, 1273.5, -2015.9, 59.1, 180.0, 95, 10);
+	DumperVeh = AddStaticVehicle(406, 2723.81, -2392.658, 15.1371, 180.0, 1, 1);
+	Hydra1Veh = AddStaticVehicle(520, 1193.8994, -2053.0, 69.9, 270.0, -1, -1);
+	Hydra2Veh = AddStaticVehicle(520, 1193.7998, -2020.3994, 69.9, 270.0, -1, -1);
+	PanzerVeh = AddStaticVehicle(432, 1273.5, -2015.9, 59.1, 180.0, 95, 10);
 
 	AddStaticVehicle(536, 2510.5398, -1687.1321, 13.3584, 50.9197, 86, 86);
 	AddStaticVehicle(587, 2480.4858, -1654.1302, 13.1872, 266.233, 86, 86);
@@ -1279,6 +1271,7 @@ public OnGameModeInit()
 	AddVehicleComponent(TunVehs[0], 1168);
 	AddVehicleComponent(TunVehs[0], 1166);
 	ChangeVehiclePaintjob(TunVehs[0], 2);
+
 	TunVehs[1] = AddStaticVehicle(559, 1363.6, 2651.2, 10.6, 0.0, 48, 79);
 	AddVehicleComponent(TunVehs[1], 1010);
 	AddVehicleComponent(TunVehs[1], 1085);
@@ -1292,6 +1285,7 @@ public OnGameModeInit()
 	AddVehicleComponent(TunVehs[1], 1161);
 	AddVehicleComponent(TunVehs[1], 1173);
 	ChangeVehiclePaintjob(TunVehs[1], 2);
+
 	TunVehs[2] = AddStaticVehicle(560, 1352.5, 2651.2, 10.6, 0.0, 77, 98);
 	AddVehicleComponent(TunVehs[2], 1010);
 	AddVehicleComponent(TunVehs[2], 1085);
@@ -1305,6 +1299,7 @@ public OnGameModeInit()
 	AddVehicleComponent(TunVehs[2], 1141);
 	AddVehicleComponent(TunVehs[2], 1169);
 	ChangeVehiclePaintjob(TunVehs[2], 2);
+
 	TunVehs[3] = AddStaticVehicle(562, 1341.4, 2651.1, 10.6, 0.0, 109, 108);
 	AddVehicleComponent(TunVehs[3], 1010);
 	AddVehicleComponent(TunVehs[3], 1085);
@@ -1318,6 +1313,7 @@ public OnGameModeInit()
 	AddVehicleComponent(TunVehs[3], 1148);
 	AddVehicleComponent(TunVehs[3], 1172);
 	ChangeVehiclePaintjob(TunVehs[3], 2);
+
 	TunVehs[4] = AddStaticVehicle(565, 1330.2, 2651.2, 10.5, 0.0, 101, 106);
 	AddVehicleComponent(TunVehs[4], 1010);
 	AddVehicleComponent(TunVehs[4], 1085);
@@ -1331,6 +1327,7 @@ public OnGameModeInit()
 	AddVehicleComponent(TunVehs[4], 1150);
 	AddVehicleComponent(TunVehs[4], 1153);
 	ChangeVehiclePaintjob(TunVehs[4], 2);
+
 	TunVehs[5] = AddStaticVehicle(587, 1319.1, 2651.3, 10.6, 0.0, 88, 88);
 	AddVehicleComponent(TunVehs[5], 1006);
 	AddVehicleComponent(TunVehs[5], 1010);
@@ -1338,11 +1335,13 @@ public OnGameModeInit()
 	AddVehicleComponent(TunVehs[5], 1085);
 	AddVehicleComponent(TunVehs[5], 1086);
 	AddVehicleComponent(TunVehs[5], 1087);
+
 	TunVehs[6] = AddStaticVehicle(602, 1307.9, 2651.1, 10.7, 0.0, 100, 100);
 	AddVehicleComponent(TunVehs[6], 1010);
 	AddVehicleComponent(TunVehs[6], 1085);
 	AddVehicleComponent(TunVehs[6], 1086);
 	AddVehicleComponent(TunVehs[6], 1087);
+
 	TunVehs[7] = AddStaticVehicle(603, 1296.8, 2650.8, 10.8, 0.0, 123, 10);
 	AddVehicleComponent(TunVehs[7], 1006);
 	AddVehicleComponent(TunVehs[7], 1010);
@@ -1354,6 +1353,7 @@ public OnGameModeInit()
 	AddVehicleComponent(TunVehs[7], 1087);
 	AddVehicleComponent(TunVehs[7], 1142);
 	AddVehicleComponent(TunVehs[7], 1143);
+
 	TunVehs[8] = AddStaticVehicle(496, 1285.7, 2650.9, 10.6, 0.0, 22, 34);
 	AddVehicleComponent(TunVehs[8], 1006);
 	AddVehicleComponent(TunVehs[8], 1007);
@@ -1367,6 +1367,7 @@ public OnGameModeInit()
 	AddVehicleComponent(TunVehs[8], 1087);
 	AddVehicleComponent(TunVehs[8], 1144);
 	AddVehicleComponent(TunVehs[8], 1145);
+
 	TunVehs[9] = AddStaticVehicle(535, 1274.9, 2651.3, 10.7, 0.0, 132, 4);
 	AddVehicleComponent(TunVehs[9], 1010);
 	AddVehicleComponent(TunVehs[9], 1085);
@@ -1378,51 +1379,61 @@ public OnGameModeInit()
 	AddVehicleComponent(TunVehs[9], 1119);
 	AddVehicleComponent(TunVehs[9], 1121);
 	ChangeVehiclePaintjob(TunVehs[9], 2);
+
 	TunVehs[10] = AddStaticVehicle(495, 1264.9, 2651.4, 11.4, 0.0, 163, 173);
 	AddVehicleComponent(TunVehs[10], 1010);
 	AddVehicleComponent(TunVehs[10], 1085);
 	AddVehicleComponent(TunVehs[10], 1086);
 	AddVehicleComponent(TunVehs[10], 1087);
+
 	TunVehs[11] = AddStaticVehicle(424, 1265.0, 2693.8, 10.7, 180.0, 42, 119);
 	AddVehicleComponent(TunVehs[11], 1010);
 	AddVehicleComponent(TunVehs[11], 1085);
 	AddVehicleComponent(TunVehs[11], 1086);
 	AddVehicleComponent(TunVehs[11], 1087);
+
 	TunVehs[12] = AddStaticVehicle(434, 1275.0, 2693.9, 11.0, 180.0, 93, 126);
 	AddVehicleComponent(TunVehs[12], 1010);
 	AddVehicleComponent(TunVehs[12], 1085);
 	AddVehicleComponent(TunVehs[12], 1086);
 	AddVehicleComponent(TunVehs[12], 1087);
+
 	TunVehs[13] = AddStaticVehicle(494, 1285.8, 2694.0, 10.8, 180.0, 32, 32);
 	AddVehicleComponent(TunVehs[13], 1010);
 	AddVehicleComponent(TunVehs[13], 1085);
 	AddVehicleComponent(TunVehs[13], 1086);
 	AddVehicleComponent(TunVehs[13], 1087);
+
 	TunVehs[14] = AddStaticVehicle(502, 1296.8, 2694.0, 10.8, 180.0, 14, 49);
 	AddVehicleComponent(TunVehs[14], 1010);
 	AddVehicleComponent(TunVehs[14], 1085);
 	AddVehicleComponent(TunVehs[14], 1086);
 	AddVehicleComponent(TunVehs[14], 1087);
+
 	TunVehs[15] = AddStaticVehicle(503, 1307.9, 2693.9, 10.8, 180.0, 77, 132);
 	AddVehicleComponent(TunVehs[15], 1010);
 	AddVehicleComponent(TunVehs[15], 1085);
 	AddVehicleComponent(TunVehs[15], 1086);
 	AddVehicleComponent(TunVehs[15], 1087);
+
 	TunVehs[16] = AddStaticVehicle(568, 1319.1, 2694.5, 10.8, 180.0, 115, 46);
 	AddVehicleComponent(TunVehs[16], 1010);
 	AddVehicleComponent(TunVehs[16], 1085);
 	AddVehicleComponent(TunVehs[16], 1086);
 	AddVehicleComponent(TunVehs[16], 1087);
+
 	TunVehs[17] = AddStaticVehicle(402, 1330.2, 2693.9, 10.8, 180.0, 105, 30);
 	AddVehicleComponent(TunVehs[17], 1010);
 	AddVehicleComponent(TunVehs[17], 1085);
 	AddVehicleComponent(TunVehs[17], 1086);
 	AddVehicleComponent(TunVehs[17], 1087);
+
 	TunVehs[18] = AddStaticVehicle(411, 1341.3, 2693.9, 10.6, 180.0, 98, 68);
 	AddVehicleComponent(TunVehs[18], 1010);
 	AddVehicleComponent(TunVehs[18], 1085);
 	AddVehicleComponent(TunVehs[18], 1086);
 	AddVehicleComponent(TunVehs[18], 1087);
+
 	TunVehs[19] = AddStaticVehicle(415, 1352.5, 2693.8, 10.7, 180.0, 109, 108);
 	AddVehicleComponent(TunVehs[19], 1007);
 	AddVehicleComponent(TunVehs[19], 1010);
@@ -1431,11 +1442,13 @@ public OnGameModeInit()
 	AddVehicleComponent(TunVehs[19], 1085);
 	AddVehicleComponent(TunVehs[19], 1086);
 	AddVehicleComponent(TunVehs[19], 1087);
+
 	TunVehs[20] = AddStaticVehicle(451, 1363.7, 2693.8, 10.6, 180.0, 37, 37);
 	AddVehicleComponent(TunVehs[20], 1010);
 	AddVehicleComponent(TunVehs[20], 1085);
 	AddVehicleComponent(TunVehs[20], 1086);
 	AddVehicleComponent(TunVehs[20], 1087);
+
 	TunVehs[21] = AddStaticVehicle(541, 1374.7, 2693.9, 10.5, 180.0, 105, 30);
 	AddVehicleComponent(TunVehs[21], 1010);
 	AddVehicleComponent(TunVehs[21], 1085);
@@ -1615,8 +1628,10 @@ public OnGameModeInit()
 	new tmpveh;
 	tmpveh = AddStaticVehicle(504, -1517.9827, 994.6107, 1037.4454, 269.9938, 198, 157);
 	LinkVehicleToInterior(tmpveh, 15);
+
 	tmpveh = AddStaticVehicle(504, -1398.8826, 1058.7346, 1038.3002, 179.4297, 186, 25);
 	LinkVehicleToInterior(tmpveh, 15);
+
 	tmpveh = AddStaticVehicle(504, -1279.2094, 991.5643, 1036.9727, 87.4943, 250, 20);
 	LinkVehicleToInterior(tmpveh, 15);
 
@@ -1679,22 +1694,23 @@ public OnGameModeInit()
 	AddStaticVehicle(411, -1711.2, -307.6, 14.0, 357.995, 34, 52);
 	AddStaticVehicle(411, -1717.2, -307.4, 14.0, 357.995, 34, 52);
 
-	FerrisWheelObjects[10] = CreateObject(18877, 389.7734, -2028.4688, 22.0, 0.0, 0.0, 90.0, 300.0);
-	FerrisWheelObjects[11] = CreateObject(18878, 389.7734, -2028.4688, 22.0, 0.0, 0.0, 90.0, 300.0);
-	for(i = sizeof(FerrisWheelObjects) - 3; i >= 0; --i)
+	FerrisWheelObj[10] = CreateObject(18877, 389.7734, -2028.4688, 22.0, 0.0, 0.0, 90.0, 300.0);
+	FerrisWheelObj[11] = CreateObject(18878, 389.7734, -2028.4688, 22.0, 0.0, 0.0, 90.0, 300.0);
+
+	for(i = sizeof(FerrisWheelObj) - 3; i >= 0; --i)
 	{
-		FerrisWheelObjects[i] = CreateObject(18879, 389.7734, -2028.4688, 22.0, 0.0, 0.0, 90.0, 300.0);
-		AttachObjectToObject(FerrisWheelObjects[i], FerrisWheelObjects[10], gFerrisCageOffsets[i][0], gFerrisCageOffsets[i][1], gFerrisCageOffsets[i][2], 0.0, 0.0, 90, 0);
+		FerrisWheelObj[i] = CreateObject(18879, 389.7734, -2028.4688, 22.0, 0.0, 0.0, 90.0, 300.0);
+		AttachObjectToObject(FerrisWheelObj[i], FerrisWheelObj[10], gFerrisCageOffsets[i][0], gFerrisCageOffsets[i][1], gFerrisCageOffsets[i][2], 0.0, 0.0, 90, 0);
 	}
 
-	iGate = CreateObject(980, 2233.8757, -2214.9118, 13.5468, 0.0, 0.0, 315.4335);
-	iGate4 = CreateObject(980, 2236.8757, -2217.9118, 13.5468, 0.0, 0.0, 315.4335);
-	iGate2 = CreateObject(980, 2720.827, -2405.449, 13.4609, 0.0, 0.0, 90.0);
-	iGate3 = CreateObject(980, 2720.827, -2504.226, 13.4609, 0.0, 0.0, 90.0);
+	iGateObj = CreateObject(980, 2233.8757, -2214.9118, 13.5468, 0.0, 0.0, 315.4335);
+	iGate4Obj = CreateObject(980, 2236.8757, -2217.9118, 13.5468, 0.0, 0.0, 315.4335);
+	iGate2Obj = CreateObject(980, 2720.827, -2405.449, 13.4609, 0.0, 0.0, 90.0);
+	iGate3Obj = CreateObject(980, 2720.827, -2504.226, 13.4609, 0.0, 0.0, 90.0);
 
-	Balloon = CreateObject(19335, 836.08, -2000.51, 13.6, 0.0, 0.0, 0.0);
-	Fire = CreateObject(18692, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-	Fire1 = CreateObject(18692, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	BalloonObj = CreateObject(19335, 836.08, -2000.51, 13.6, 0.0, 0.0, 0.0);
+	FireObj = CreateObject(18692, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	Fire1Obj = CreateObject(18692, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	CreateObject(19087, 834.98, -1999.36, 13.88, 27.0, 31.0, 5.0);
 	CreateObject(19087, 837.26, -1999.36, 13.88, 27.0, -31.0, 5.0);
 	CreateObject(19087, 837.28, -2001.7, 13.88, -27.0, -31.0, 5.0);
@@ -1707,10 +1723,10 @@ public OnGameModeInit()
 	CreateObject(1468, 839.03, -2000.36, 13.2, 0.0, 0.0, 90.0);
 	CreateObject(1468, 833.14, -2000.68, 13.2, 0.0, 0.0, -90.0);
 	CreateObject(3361, 836.17, -1994.27, 12.4, 0.0, 0.0, 90.0);
-	AttachObjectToObject(Fire, Balloon, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 1);
-	AttachObjectToObject(Fire1, Balloon, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 1);
+	AttachObjectToObject(FireObj, BalloonObj, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 1);
+	AttachObjectToObject(Fire1Obj, BalloonObj, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 1);
 
-	VipGates = CreateObject(980, 77.9044, 266.1524, 4.4453, 0.0, 0.0, 150.0);
+	VipGatesObj = CreateObject(980, 77.9044, 266.1524, 4.4453, 0.0, 0.0, 150.0);
 
 	CreateObject(16037, 47.2306, 212.921, 5.3296, 0.0, 0.0, 60.0);
 	CreateObject(8071, 111.6527, 347.4217, 2.7624, 0.0, 0.0, 61.0);
@@ -2014,7 +2030,7 @@ public OnGameModeExit()
 		}
 	}
 	ElevatorDestroy();
-	for(i = sizeof(FerrisWheelObjects) - 1; i >= 0; --i) DestroyObject(FerrisWheelObjects[i]);
+	for(i = sizeof(FerrisWheelObj) - 1; i >= 0; --i) DestroyObject(FerrisWheelObj[i]);
 	TextDrawDestroy(TDLogo);
 	TextDrawDestroy(TDLogo2);
 	KillTimer(CountTmr);
@@ -2038,7 +2054,7 @@ public OnPlayerConnect(playerid)
 	PlayerInfo[playerid][pSpec] = INVALID_PLAYER_ID;
 	PlayerInfo[playerid][pPvpCreate] = INVALID_PLAYER_ID;
 	PlayerInfo[playerid][pPointsId] = INVALID_PLAYER_ID;
-	PlayerInfo[playerid][pClicked] = INVALID_PLAYER_ID;
+	PlayerInfo[playerid][pClickedId] = INVALID_PLAYER_ID;
 	PlayerInfo[playerid][pGiveMoneyTmr] = -1;
 	PlayerInfo[playerid][pCountPvpTmr] = -1;
 	PlayerInfo[playerid][pAntiSKTmr] = -1;
@@ -2069,29 +2085,22 @@ public OnPlayerConnect(playerid)
 	PlayerInfo[playerid][pRaceInfo] = CreatePlayerTextDraw(playerid, 633.0, 348.0, "_");
 	PlayerTextDrawAlignment(playerid, PlayerInfo[playerid][pRaceInfo], 3);
 	PlayerTextDrawBackgroundColor(playerid, PlayerInfo[playerid][pRaceInfo], 255);
-	PlayerTextDrawFont(playerid, PlayerInfo[playerid][pRaceInfo], 1);
 	PlayerTextDrawLetterSize(playerid, PlayerInfo[playerid][pRaceInfo], 0.24, 1.1);
 	PlayerTextDrawColor(playerid, PlayerInfo[playerid][pRaceInfo], -687931137);
-	PlayerTextDrawSetOutline(playerid, PlayerInfo[playerid][pRaceInfo], 0);
-	PlayerTextDrawSetProportional(playerid, PlayerInfo[playerid][pRaceInfo], 1);
 	PlayerTextDrawSetShadow(playerid, PlayerInfo[playerid][pRaceInfo], 1);
 
 	PlayerInfo[playerid][pVehSpeed] = CreatePlayerTextDraw(playerid, 72.5, 319.0, "_");
 	PlayerTextDrawAlignment(playerid, PlayerInfo[playerid][pVehSpeed], 3);
 	PlayerTextDrawBackgroundColor(playerid, PlayerInfo[playerid][pVehSpeed], 255);
-	PlayerTextDrawFont(playerid, PlayerInfo[playerid][pVehSpeed], 1);
 	PlayerTextDrawLetterSize(playerid, PlayerInfo[playerid][pVehSpeed], 0.3099, 1.0999);
 	PlayerTextDrawColor(playerid, PlayerInfo[playerid][pVehSpeed], 16711935);
 	PlayerTextDrawSetOutline(playerid, PlayerInfo[playerid][pVehSpeed], 1);
-	PlayerTextDrawSetProportional(playerid, PlayerInfo[playerid][pVehSpeed], 1);
 
 	PlayerInfo[playerid][pMutedTime] = CreatePlayerTextDraw(playerid, 17.0, 428.0, "_");
 	PlayerTextDrawBackgroundColor(playerid, PlayerInfo[playerid][pMutedTime], 255);
-	PlayerTextDrawFont(playerid, PlayerInfo[playerid][pMutedTime], 1);
 	PlayerTextDrawLetterSize(playerid, PlayerInfo[playerid][pMutedTime], 0.39, 1.1);
 	PlayerTextDrawColor(playerid, PlayerInfo[playerid][pMutedTime], -16776961);
 	PlayerTextDrawSetOutline(playerid, PlayerInfo[playerid][pMutedTime], 1);
-	PlayerTextDrawSetProportional(playerid, PlayerInfo[playerid][pMutedTime], 1);
 
 	SetPlayerMapIcon(playerid, 0, 1969.2941, -2186.8699, 13.5469, 19, 0, MAPICON_LOCAL);
 	SetPlayerMapIcon(playerid, 1, -1552.7843, -427.2818, 6.0163, 19, 0, MAPICON_LOCAL);
@@ -2114,7 +2123,7 @@ public OnPlayerConnect(playerid)
 	RemoveBuildingForPlayer(playerid, 3752, 389.875, -2028.5, 32.2266, 50.0);
 
 	static string[145];
-	GetPlayerName(playerid, PlayerInfo[playerid][pName], MAX_PLAYER_NAME);
+	GetPlayerName(playerid, PlayerInfo[playerid][pName], MAX_PLAYER_NAME + 1);
 	format(string, sizeof string, "*** %s (id: %d) вошел(ла) на сервер", PlayerInfo[playerid][pName], playerid);
 	SendClientMessageToAll(COLOR_GRAY, string);
 	PlaySoundForAll(1056, 0.0, 0.0, 0.0);
@@ -2194,35 +2203,35 @@ public OnPlayerDisconnect(playerid, reason)
 		}
 		PlayerInfo[playerid][pInPvp] = false;
 	}
-	if(PlayerInfo[playerid][pSpikes] > 0)
+	if(PlayerInfo[playerid][pSpikesObj] > 0)
 	{
-		DestroyObject(PlayerInfo[playerid][pSpikes]);
-		PlayerInfo[playerid][pSpikes] = 0;
+		DestroyObject(PlayerInfo[playerid][pSpikesObj]);
+		PlayerInfo[playerid][pSpikesObj] = 0;
 	}
 	if(PlayerInfo[playerid][pMineStatus] > 0)
 	{
 		if(PlayerInfo[playerid][pMineStatus] == 1)
 		{
 			Delete3DTextLabel(PlayerInfo[playerid][pMineLabel]);
-			DestroyObject(PlayerInfo[playerid][pMine][1]);
+			DestroyObject(PlayerInfo[playerid][pMineObj][1]);
 			KillTimer(PlayerInfo[playerid][pMineTmr]);
 		}
-		else DestroyPickup(PlayerInfo[playerid][pMinePickup]);
-		DestroyObject(PlayerInfo[playerid][pMine][0]);
+		else DestroyPickup(PlayerInfo[playerid][pMinePick]);
+		DestroyObject(PlayerInfo[playerid][pMineObj][0]);
 		PlayerInfo[playerid][pMineStatus] = 0;
 	}
 	if(PlayerInfo[playerid][pNeonStatus])
 	{
 		for(new i = 11; i >= 0; --i)
 		{
-			DestroyObject(PlayerInfo[playerid][pNeon][i]);
-			PlayerInfo[playerid][pNeon][i] = 0;
+			DestroyObject(PlayerInfo[playerid][pNeonObj][i]);
+			PlayerInfo[playerid][pNeonObj][i] = 0;
 		}
 		PlayerInfo[playerid][pNeonStatus] = false;
 	}
 	if(PlayerInfo[playerid][pInRace])
 	{
-		JoinCount--;
+		RaceJoinCount--;
 		StopPlayerRace(playerid);
 	}
 	SaveAccount(playerid);
@@ -2268,7 +2277,7 @@ public OnPlayerDisconnect(playerid, reason)
 	PlayerInfo[playerid][pWarns] = 0;
 	PlayerInfo[playerid][pMoney] = 0;
 	PlayerInfo[playerid][pGang] = 0;
-	PlayerInfo[playerid][pInDm] = 0;
+	PlayerInfo[playerid][pDmZone] = 0;
 	static string[145];
 	format(string, sizeof string, "*** %s (id: %d) вышел(ла) из игры (%s)", PlayerInfo[playerid][pName], playerid, DisReasons[reason]);
 	SendClientMessageToAll(COLOR_GRAY, string);
@@ -2484,12 +2493,12 @@ public OnPlayerSpawn(playerid)
 	if(PlayerInfo[playerid][pSkin] >= 0) SetPlayerSkin(playerid, PlayerInfo[playerid][pSkin]);
 	if(PlayerInfo[playerid][pGang] > 0)
 	{
-		if(GSkin[PlayerInfo[playerid][pGang]][PlayerInfo[playerid][pGangLvl] - 1] >= 0) SetPlayerSkin(playerid, GSkin[PlayerInfo[playerid][pGang]][PlayerInfo[playerid][pGangLvl] - 1]);
-		if(GSpawn[PlayerInfo[playerid][pGang]][0] && GSpawn[PlayerInfo[playerid][pGang]][1] && GSpawn[PlayerInfo[playerid][pGang]][2]) SetPlayerPos(playerid, GSpawn[PlayerInfo[playerid][pGang]][0], GSpawn[PlayerInfo[playerid][pGang]][1], GSpawn[PlayerInfo[playerid][pGang]][2]);
-		SetPlayerColor(playerid, HexToInt(GColor[PlayerInfo[playerid][pGang]]));
-		SetPlayerInterior(playerid, GSpawnInt[PlayerInfo[playerid][pGang]]);
+		if(GangSkin[PlayerInfo[playerid][pGang]][PlayerInfo[playerid][pGangLvl] - 1] >= 0) SetPlayerSkin(playerid, GangSkin[PlayerInfo[playerid][pGang]][PlayerInfo[playerid][pGangLvl] - 1]);
+		if(GangSpawn[PlayerInfo[playerid][pGang]][0] && GangSpawn[PlayerInfo[playerid][pGang]][1] && GangSpawn[PlayerInfo[playerid][pGang]][2]) SetPlayerPos(playerid, GangSpawn[PlayerInfo[playerid][pGang]][0], GangSpawn[PlayerInfo[playerid][pGang]][1], GangSpawn[PlayerInfo[playerid][pGang]][2]);
+		SetPlayerColor(playerid, HexToInt(GangColor[PlayerInfo[playerid][pGang]]));
+		SetPlayerInterior(playerid, GangSpawnInt[PlayerInfo[playerid][pGang]]);
 	}
-	switch(PlayerInfo[playerid][pInDm])
+	switch(PlayerInfo[playerid][pDmZone])
 	{
 		case 1:
 		{
@@ -2581,7 +2590,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 	PlayerInfo[playerid][pMoney] -= 600;
 	if(PlayerInfo[playerid][pInRace])
 	{
-		JoinCount--;
+		RaceJoinCount--;
 		StopPlayerRace(playerid);
 	}
 	if(BuildRace == playerid + 1) BuildRace = 0;
@@ -2612,7 +2621,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 			{
 				case TEAM_GROVE:
 				{
-					if(++PlayerInfo[killerid][pTurfBackCount] >= REOWN_TURF)
+					if(++PlayerInfo[killerid][pTurfBackCount] >= KILLS_FOR_REOWN_TURF)
 					{
 						GangZoneStopFlashForAll(GroveGz);
 						GangZoneHideForAll(GroveGz);
@@ -2622,7 +2631,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				}
 				case TEAM_BALLAS:
 				{
-					if(++PlayerInfo[killerid][pTurfBackCount] >= REOWN_TURF)
+					if(++PlayerInfo[killerid][pTurfBackCount] >= KILLS_FOR_REOWN_TURF)
 					{
 						GangZoneStopFlashForAll(BallasGz);
 						GangZoneHideForAll(BallasGz);
@@ -2632,7 +2641,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				}
 				case TEAM_AZTEC:
 				{
-					if(++PlayerInfo[killerid][pTurfBackCount] >= REOWN_TURF)
+					if(++PlayerInfo[killerid][pTurfBackCount] >= KILLS_FOR_REOWN_TURF)
 					{
 						GangZoneStopFlashForAll(AztecGz);
 						GangZoneHideForAll(AztecGz);
@@ -2642,7 +2651,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				}
 				case TEAM_NANG:
 				{
-					if(++PlayerInfo[killerid][pTurfBackCount] >= REOWN_TURF)
+					if(++PlayerInfo[killerid][pTurfBackCount] >= KILLS_FOR_REOWN_TURF)
 					{
 						GangZoneStopFlashForAll(NangGz);
 						GangZoneHideForAll(NangGz);
@@ -2652,7 +2661,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				}
 				case TEAM_VAGOS:
 				{
-					if(++PlayerInfo[killerid][pTurfBackCount] >= REOWN_TURF)
+					if(++PlayerInfo[killerid][pTurfBackCount] >= KILLS_FOR_REOWN_TURF)
 					{
 						GangZoneStopFlashForAll(VagosGz);
 						GangZoneHideForAll(VagosGz);
@@ -2662,7 +2671,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				}
 				case TEAM_MAFIA:
 				{
-					if(++PlayerInfo[killerid][pTurfBackCount] >= REOWN_TURF)
+					if(++PlayerInfo[killerid][pTurfBackCount] >= KILLS_FOR_REOWN_TURF)
 					{
 						GangZoneStopFlashForAll(MafiaGz);
 						GangZoneHideForAll(MafiaGz);
@@ -2672,7 +2681,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				}
 				case TEAM_COPS:
 				{
-					if(++PlayerInfo[killerid][pTurfBackCount] >= REOWN_TURF)
+					if(++PlayerInfo[killerid][pTurfBackCount] >= KILLS_FOR_REOWN_TURF)
 					{
 						GangZoneStopFlashForAll(CopsGz);
 						GangZoneHideForAll(CopsGz);
@@ -2682,7 +2691,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				}
 				case TEAM_BIKER:
 				{
-					if(++PlayerInfo[killerid][pTurfBackCount] >= REOWN_TURF)
+					if(++PlayerInfo[killerid][pTurfBackCount] >= KILLS_FOR_REOWN_TURF)
 					{
 						GangZoneStopFlashForAll(BikerGz);
 						GangZoneHideForAll(BikerGz);
@@ -2692,7 +2701,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				}
 				case TEAM_TRIAD:
 				{
-					if(++PlayerInfo[killerid][pTurfBackCount] >= REOWN_TURF)
+					if(++PlayerInfo[killerid][pTurfBackCount] >= KILLS_FOR_REOWN_TURF)
 					{
 						GangZoneStopFlashForAll(TriadGz);
 						GangZoneHideForAll(TriadGz);
@@ -2702,7 +2711,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				}
 				case TEAM_ARMY:
 				{
-					if(++PlayerInfo[killerid][pTurfBackCount] >= REOWN_TURF)
+					if(++PlayerInfo[killerid][pTurfBackCount] >= KILLS_FOR_REOWN_TURF)
 					{
 						GangZoneStopFlashForAll(ArmyGz);
 						GangZoneHideForAll(ArmyGz);
@@ -2712,7 +2721,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				}
 				case TEAM_BANDIT:
 				{
-					if(++PlayerInfo[killerid][pTurfBackCount] >= REOWN_TURF)
+					if(++PlayerInfo[killerid][pTurfBackCount] >= KILLS_FOR_REOWN_TURF)
 					{
 						GangZoneStopFlashForAll(BanditGz);
 						GangZoneHideForAll(BanditGz);
@@ -2733,12 +2742,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 						PlayerInfo[playerid][pGangKillCount]++;
 						switch(PlayerInfo[playerid][pGangKillCount])
 						{
-							case GANGAREA_WARNINGS:
+							case KILLS_FOR_GANGAREA_WARNING:
 							{
 								SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Грувовцы атакованы!");
 								if(PlayerInfo[killerid][pGang] <= 0) GangZoneFlashForAll(GroveGz, GetPlayerColor(killerid));
 							}
-							case GANGAREA_TAKE:
+							case KILLS_FOR_GANGAREA_TAKE:
 							{
 								if(PlayerInfo[killerid][pGang] <= 0)
 								{
@@ -2760,12 +2769,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 						PlayerInfo[playerid][pGangKillCount]++;
 						switch(PlayerInfo[playerid][pGangKillCount])
 						{
-							case GANGAREA_WARNINGS:
+							case KILLS_FOR_GANGAREA_WARNING:
 							{
 								SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Балласы атакованы!");
 								if(PlayerInfo[killerid][pGang] <= 0) GangZoneFlashForAll(BallasGz, GetPlayerColor(killerid));
 							}
-							case GANGAREA_TAKE:
+							case KILLS_FOR_GANGAREA_TAKE:
 							{
 								if(PlayerInfo[killerid][pGang] <= 0)
 								{
@@ -2787,12 +2796,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 						PlayerInfo[playerid][pGangKillCount]++;
 						switch(PlayerInfo[playerid][pGangKillCount])
 						{
-							case GANGAREA_WARNINGS:
+							case KILLS_FOR_GANGAREA_WARNING:
 							{
 								SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Команда Ацтеков атакована!");
 								if(PlayerInfo[killerid][pGang] <= 0) GangZoneFlashForAll(AztecGz, GetPlayerColor(killerid));
 							}
-							case GANGAREA_TAKE:
+							case KILLS_FOR_GANGAREA_TAKE:
 							{
 								if(PlayerInfo[killerid][pGang] <= 0)
 								{
@@ -2814,12 +2823,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 						PlayerInfo[playerid][pGangKillCount]++;
 						switch(PlayerInfo[playerid][pGangKillCount])
 						{
-							case GANGAREA_WARNINGS:
+							case KILLS_FOR_GANGAREA_WARNING:
 							{
 								SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Команда Nang атакована!");
 								if(PlayerInfo[killerid][pGang] <= 0) GangZoneFlashForAll(NangGz, GetPlayerColor(killerid));
 							}
-							case GANGAREA_TAKE:
+							case KILLS_FOR_GANGAREA_TAKE:
 							{
 								if(PlayerInfo[killerid][pGang] <= 0)
 								{
@@ -2841,12 +2850,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 						PlayerInfo[playerid][pGangKillCount]++;
 						switch(PlayerInfo[playerid][pGangKillCount])
 						{
-							case GANGAREA_WARNINGS:
+							case KILLS_FOR_GANGAREA_WARNING:
 							{
 								SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Вагосы атакованы!");
 								if(PlayerInfo[killerid][pGang] <= 0) GangZoneFlashForAll(VagosGz, GetPlayerColor(killerid));
 							}
-							case GANGAREA_TAKE:
+							case KILLS_FOR_GANGAREA_TAKE:
 							{
 								if(PlayerInfo[killerid][pGang] <= 0)
 								{
@@ -2868,12 +2877,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 						PlayerInfo[playerid][pGangKillCount]++;
 						switch(PlayerInfo[playerid][pGangKillCount])
 						{
-							case GANGAREA_WARNINGS:
+							case KILLS_FOR_GANGAREA_WARNING:
 							{
 								SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Копы атакованы!");
 								if(PlayerInfo[killerid][pGang] <= 0) GangZoneFlashForAll(CopsGz, GetPlayerColor(killerid));
 							}
-							case GANGAREA_TAKE:
+							case KILLS_FOR_GANGAREA_TAKE:
 							{
 								if(PlayerInfo[killerid][pGang] <= 0)
 								{
@@ -2895,12 +2904,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 						PlayerInfo[playerid][pGangKillCount]++;
 						switch(PlayerInfo[playerid][pGangKillCount])
 						{
-							case GANGAREA_WARNINGS:
+							case KILLS_FOR_GANGAREA_WARNING:
 							{
 								SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Мафия атакована!");
 								if(PlayerInfo[killerid][pGang] <= 0) GangZoneFlashForAll(MafiaGz, GetPlayerColor(killerid));
 							}
-							case GANGAREA_TAKE:
+							case KILLS_FOR_GANGAREA_TAKE:
 							{
 								if(PlayerInfo[killerid][pGang] <= 0)
 								{
@@ -2922,12 +2931,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 						PlayerInfo[playerid][pGangKillCount]++;
 						switch(PlayerInfo[playerid][pGangKillCount])
 						{
-							case GANGAREA_WARNINGS:
+							case KILLS_FOR_GANGAREA_WARNING:
 							{
 								SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Команда байкеров атакована!");
 								if(PlayerInfo[killerid][pGang] <= 0) GangZoneFlashForAll(BikerGz, GetPlayerColor(killerid));
 							}
-							case GANGAREA_TAKE:
+							case KILLS_FOR_GANGAREA_TAKE:
 							{
 								if(PlayerInfo[killerid][pGang] <= 0)
 								{
@@ -2949,12 +2958,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 						PlayerInfo[playerid][pGangKillCount]++;
 						switch(PlayerInfo[playerid][pGangKillCount])
 						{
-							case GANGAREA_WARNINGS:
+							case KILLS_FOR_GANGAREA_WARNING:
 							{
 								SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Триада атакована!");
 								if(PlayerInfo[killerid][pGang] <= 0) GangZoneFlashForAll(TriadGz, GetPlayerColor(killerid));
 							}
-							case GANGAREA_TAKE:
+							case KILLS_FOR_GANGAREA_TAKE:
 							{
 								if(PlayerInfo[killerid][pGang] <= 0)
 								{
@@ -2973,7 +2982,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 				{
 					if(PlayerInfo[killerid][pTeam] != TEAM_ADMIN)
 					{
-						if(++PlayerInfo[playerid][pGangKillCount] > GANGAREA_WARNINGS)
+						if(++PlayerInfo[playerid][pGangKillCount] > KILLS_FOR_GANGAREA_WARNING)
 						{
 							SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Команда админов атакована!");
 							PlayerInfo[playerid][pGangKillCount] = 0;
@@ -2987,12 +2996,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 						PlayerInfo[playerid][pGangKillCount]++;
 						switch(PlayerInfo[playerid][pGangKillCount])
 						{
-							case GANGAREA_WARNINGS:
+							case KILLS_FOR_GANGAREA_WARNING:
 							{
 								SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Армия атакована!");
 								if(PlayerInfo[killerid][pGang] <= 0) GangZoneFlashForAll(ArmyGz, GetPlayerColor(killerid));
 							}
-							case GANGAREA_TAKE:
+							case KILLS_FOR_GANGAREA_TAKE:
 							{
 								if(PlayerInfo[killerid][pGang] <= 0)
 								{
@@ -3014,12 +3023,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 						PlayerInfo[playerid][pGangKillCount]++;
 						switch(PlayerInfo[playerid][pGangKillCount])
 						{
-							case GANGAREA_WARNINGS:
+							case KILLS_FOR_GANGAREA_WARNING:
 							{
 								SendClientMessageToAll(COLOR_BORDO, "Сообщение гангзоны: Клан Bandit атакован!");
 								if(PlayerInfo[killerid][pGang] <= 0) GangZoneFlashForAll(BanditGz, GetPlayerColor(killerid));
 							}
-							case GANGAREA_TAKE:
+							case KILLS_FOR_GANGAREA_TAKE:
 							{
 								if(PlayerInfo[killerid][pGang] <= 0)
 								{
@@ -3038,34 +3047,34 @@ public OnPlayerDeath(playerid, killerid, reason)
 		}
 		else if(PlayerInfo[playerid][pGang] != PlayerInfo[killerid][pGang])
 		{
-			GKills[PlayerInfo[playerid][pGang]]++;
+			GangKills[PlayerInfo[playerid][pGang]]++;
 			PlayerInfo[playerid][pGangKillCount]++;
 			switch(PlayerInfo[playerid][pGangKillCount])
 			{
-				case GANGAREA_WARNINGS:
+				case KILLS_FOR_GANGAREA_WARNING:
 				{
-					format(string, sizeof string, "Сообщение гангзоны: Банда \"%s\" атакована!", GName[PlayerInfo[playerid][pGang]]);
+					format(string, sizeof string, "Сообщение гангзоны: Банда \"%s\" атакована!", GangName[PlayerInfo[playerid][pGang]]);
 					SendClientMessageToAll(COLOR_BORDO, string);
 				}
-				case GANGAREA_TAKE:
+				case KILLS_FOR_GANGAREA_TAKE:
 				{
-					format(string, sizeof string, "Сообщение гангзоны: %s одержал победу над бандой \"%s\"", PlayerInfo[killerid][pName], GName[PlayerInfo[playerid][pGang]]);
+					format(string, sizeof string, "Сообщение гангзоны: %s одержал победу над бандой \"%s\"", PlayerInfo[killerid][pName], GangName[PlayerInfo[playerid][pGang]]);
 					SendClientMessageToAll(COLOR_BORDO, string);
 					PlayerInfo[playerid][pGangKillCount] = 0;
-					GKills[PlayerInfo[playerid][pGang]] = 0;
+					GangKills[PlayerInfo[playerid][pGang]] = 0;
 				}
 			}
-			switch(GKills[PlayerInfo[playerid][pGang]])
+			switch(GangKills[PlayerInfo[playerid][pGang]])
 			{
-				case GANGAREA_TAKE:
+				case KILLS_FOR_GANGAREA_TAKE:
 				{
-					format(string, sizeof string, "Сообщение гангзоны: Банда \"%s\" одержала победу над бандой \"%s\"", GName[PlayerInfo[killerid][pGang]], GName[PlayerInfo[playerid][pGang]]);
+					format(string, sizeof string, "Сообщение гангзоны: Банда \"%s\" одержала победу над бандой \"%s\"", GangName[PlayerInfo[killerid][pGang]], GangName[PlayerInfo[playerid][pGang]]);
 					SendClientMessageToAll(GetPlayerColor(killerid), string);
-					GKills[PlayerInfo[playerid][pGang]] = 0;
+					GangKills[PlayerInfo[playerid][pGang]] = 0;
 				}
 			}
 		}
-		if(PlayerInfo[playerid][pTeam] == PlayerInfo[killerid][pTeam] && PlayerInfo[playerid][pGang] == PlayerInfo[killerid][pGang] || PlayerInfo[playerid][pGang] > 0 && PlayerInfo[killerid][pGang] > 0 && PlayerInfo[playerid][pGang] == PlayerInfo[killerid][pGang])
+		if((PlayerInfo[playerid][pTeam] == PlayerInfo[killerid][pTeam] || PlayerInfo[playerid][pGang] > 0 && PlayerInfo[killerid][pGang] > 0) && PlayerInfo[playerid][pGang] == PlayerInfo[killerid][pGang])
 		{
 			SetPlayerHealth(killerid, 0.0);
 			PlayerInfo[killerid][pMoney] -= 1000;
@@ -3100,7 +3109,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 		else
 		{
 			GameTextForPlayer(killerid, "~r~Owned", 5000, 1);
-			if(PlayerInfo[killerid][pInDm] > 0) PlayerInfo[killerid][pDmPoints]++;
+			if(PlayerInfo[killerid][pDmZone] > 0) PlayerInfo[killerid][pDmPoints]++;
 			else
 			{
 				PlayerInfo[killerid][pKills]++;
@@ -3183,10 +3192,10 @@ public OnPlayerText(playerid, text[])
 		Ban2(playerid);
 		return 0;
 	}
-	for(new s, i, pos, start, end; s < sizeof Swears; s++)
+	for(new s, i, pos, start, end; s < sizeof BadWords; s++)
 	{
 		pos = -1;
-		while((pos = strfuzzyfind(text, Swears[s], pos + 1, start, end)) != -1)
+		while((pos = strfuzzyfind(text, BadWords[s], pos + 1, start, end)) != -1)
 		{
 			for(i = end; i >= start; --i) text[i] = '*';
 		}
@@ -3199,7 +3208,7 @@ public OnPlayerText(playerid, text[])
 		if(IsEmptyMessage(text[1])) return 0;
 		if(PlayerInfo[playerid][pGang] > 0)
 		{
-			format(string, sizeof string, "* Чат банды %s >> от %s: %s", GName[PlayerInfo[playerid][pGang]], PlayerInfo[playerid][pName], text[1]);
+			format(string, sizeof string, "* Чат банды %s >> от %s: %s", GangName[PlayerInfo[playerid][pGang]], PlayerInfo[playerid][pName], text[1]);
 			SendClientMessageToGang(PlayerInfo[playerid][pGang], GetPlayerColor(playerid), string);
 		}
 		else
@@ -3216,9 +3225,9 @@ public OnPlayerText(playerid, text[])
 		SendClientMessageToAdmins(COLOR_LIME, string);
 		return 0;
 	}
-	if(PlayerInfo[playerid][pGang] > 0 && GTag[PlayerInfo[playerid][pGang]])
+	if(PlayerInfo[playerid][pGang] > 0 && GangTag[PlayerInfo[playerid][pGang]])
 	{
-		format(string, sizeof string, "[%s]%s(%d): {FFFFFF}%s", GName[PlayerInfo[playerid][pGang]], PlayerInfo[playerid][pName], playerid, text);
+		format(string, sizeof string, "[%s]%s(%d): {FFFFFF}%s", GangName[PlayerInfo[playerid][pGang]], PlayerInfo[playerid][pName], playerid, text);
 		SendClientMessageToAll(GetPlayerColor(playerid), string);
 		return 0;
 	}
@@ -3267,7 +3276,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		}
 		format(string, sizeof string, "{FFFF00}Статистика %s", PlayerInfo[player][pName]);
 		format(string2, sizeof string2, "Убийств: %d\nСмертей: %d\nПоказатель: %0.2f\nОчков: %d\nDM Points: %d\nБанда: %s\nУровень в банде: %d\nДеньги: $%d\nВремя на сервере: %d час\nВозможность приглашения на PVP: %s\nПодключений к серверу: %d\nСтиль боя: %d\nСкин: %d", PlayerInfo[player][pKills],
-		PlayerInfo[player][pDeaths], float(PlayerInfo[player][pKills]) / float(PlayerInfo[player][pDeaths]), PlayerInfo[player][pPoints], PlayerInfo[player][pDmPoints], (GName[PlayerInfo[player][pGang]][0] ? GName[PlayerInfo[player][pGang]] : "Нет"),
+		PlayerInfo[player][pDeaths], float(PlayerInfo[player][pKills]) / float(PlayerInfo[player][pDeaths]), PlayerInfo[player][pPoints], PlayerInfo[player][pDmPoints], (GangName[PlayerInfo[player][pGang]][0] ? GangName[PlayerInfo[player][pGang]] : "Нет"),
 		PlayerInfo[player][pGangLvl], PlayerInfo[player][pMoney], floatround(PlayerInfo[player][pSeconds] / 3600, floatround_tozero), PlayerInfo[player][pPvpAccept] ? ("Да") : ("Нет"), PlayerInfo[player][pConnectCount], PlayerInfo[playerid][pFightStyle], PlayerInfo[playerid][pSkin]);
 		ShowPlayerDialog(playerid, DIALOG_STATS, DIALOG_STYLE_MSGBOX, string, string2, "Ок", "");
 		return 1;
@@ -3276,7 +3285,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(BalloonIsStarted) return SendClientMessage(playerid, COLOR_BORDO, "Воздушный шар уже запущен!");
 		if(!IsPlayerInRangeOfPoint(playerid, 10.0, 836.08, -2000.51, 13.6)) return SendClientMessage(playerid, COLOR_BORDO, "Вы находитесь слишком далеко!");
-		MoveObject(Balloon, 856.731, -2011.687, 45.7461, 3.0);
+		MoveObject(BalloonObj, 856.731, -2011.687, 45.7461, 3.0);
 		Delete3DTextLabel(BalloonLabel);
 		BalloonIsStarted = true;
 		BalloonStage = 1;
@@ -3285,17 +3294,17 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	if(!strcmp(cmd, "/spikes", true))
 	{
 		if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_BORDO, "*** Ошибка: Вы не должны находиться в автомобиле!");
-		if(PlayerInfo[playerid][pSpikes] <= 0)
+		if(PlayerInfo[playerid][pSpikesObj] <= 0)
 		{
 			new Float:plocx, Float:plocy, Float:plocz, Float:ploca;
 			GetPlayerPos(playerid, plocx, plocy, plocz);
 			GetPlayerFacingAngle(playerid, ploca);
-			PlayerInfo[playerid][pSpikes] = CreateObject(2899, plocx, plocy, plocz - 0.9, 0.0, 0.0, ploca - 90.0);
+			PlayerInfo[playerid][pSpikesObj] = CreateObject(2899, plocx, plocy, plocz - 0.9, 0.0, 0.0, ploca - 90.0);
 		}
 		else
 		{
-			DestroyObject(PlayerInfo[playerid][pSpikes]);
-			PlayerInfo[playerid][pSpikes] = 0;
+			DestroyObject(PlayerInfo[playerid][pSpikesObj]);
+			PlayerInfo[playerid][pSpikesObj] = 0;
 		}
 		return 1;
 	}
@@ -3314,7 +3323,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы участвуете в PvP.");
 		if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Вы участвуете в гонке.");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 		if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 		SetPlayerPos(playerid, -1470.8719, 947.058, 1036.7661);
 		SetPlayerFacingAngle(playerid, 332.0);
@@ -3346,7 +3355,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы участвуете в PvP.");
 		if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Вы участвуете в гонке.");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 		if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 		SetPlayerPos(playerid, 1285.0985, 2681.6624, 10.8203);
 		SetPlayerFacingAngle(playerid, 0.0);
@@ -3372,15 +3381,15 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(GetPlayerState(playerid) != PLAYER_STATE_DRIVER) return SendClientMessage(playerid, COLOR_BORDO, "*** Ошибка: Вы должны находиться в автомобиле!");
 		new vehid = GetPlayerVehicleID(playerid);
 		if(!IsACar(vehid)) return SendClientMessage(playerid, COLOR_RED, "Мигалка недоступна для этого транспорта!");
-		if(Flasher[vehid])
+		if(FlasherObj[vehid])
 		{
-			DestroyObject(Flasher[vehid]);
-			Flasher[vehid] = 0;
+			DestroyObject(FlasherObj[vehid]);
+			FlasherObj[vehid] = 0;
 		}
 		else
 		{
-			Flasher[vehid] = CreateObject(19419, 0, 0, 0, 0, 0, 0, 0.0);
-			AttachObjectToVehicle(Flasher[vehid], vehid, -0.0, -0.2, 0.74, 1.0, 1.0, 1.0);
+			FlasherObj[vehid] = CreateObject(19419, 0, 0, 0, 0, 0, 0, 0.0);
+			AttachObjectToVehicle(FlasherObj[vehid], vehid, -0.0, -0.2, 0.74, 1.0, 1.0, 1.0);
 		}
 		return 1;
 	}
@@ -3388,7 +3397,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы участвуете в PvP.");
 		if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Вы участвуете в гонке.");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 		if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 		SetPlayerSkin(playerid, 178);
 		SetPlayerPos(playerid, 2096.9209, 2062.2678, 10.8203);
@@ -3471,7 +3480,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы участвуете в PvP.");
 		if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Вы участвуете в гонке.");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 		if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 		new Float:slx, Float:sly, Float:slz;
 		GetPlayerPos(playerid, slx, sly, slz);
@@ -3502,7 +3511,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы участвуете в PvP.");
 		if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Вы участвуете в гонке.");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 		if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 		format(string, sizeof string, "%s телепортировался на драг зону (/drag)", PlayerInfo[playerid][pName]);
 		SendClientMessageWithoutPlayer(playerid, COLOR_YELLOW, string);
@@ -3519,7 +3528,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы участвуете в PvP.");
 		if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Вы участвуете в гонке.");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 		if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 		format(string, sizeof string, "%s телепортировался в Китайский Ресторан (/china)", PlayerInfo[playerid][pName]);
 		SendClientMessageWithoutPlayer(playerid, COLOR_YELLOW, string);
@@ -3553,7 +3562,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы участвуете в PvP.");
 		if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Вы участвуете в гонке.");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 		if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 		if(PlayerInfo[playerid][pMoney] < 1000) return SendClientMessage(playerid, COLOR_DARKRED, "У вас недостаточно денег!");
 		SendClientMessage(playerid, COLOR_GREEN, "Вы телепортировались на остров VIP");
@@ -3569,20 +3578,20 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	if(!strcmp(cmd, "/vipon", true))
 	{
 		SendClientMessage(playerid, COLOR_GREEN, "Ворота на остров VIP открыты");
-		MoveObject(VipGates, 77.9044, 266.1524, 10.4453, 2.0);
+		MoveObject(VipGatesObj, 77.9044, 266.1524, 10.4453, 2.0);
 		return 1;
 	}
 	if(!strcmp(cmd, "/vipoff", true))
 	{
 		SendClientMessage(playerid, COLOR_GREEN, "Ворота на остров VIP закрыты");
-		MoveObject(VipGates, 77.9044, 266.1524, 4.4453, 2.0);
+		MoveObject(VipGatesObj, 77.9044, 266.1524, 4.4453, 2.0);
 		return 1;
 	}
 	if(!strcmp(cmd, "/dm", true))
 	{
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы участвуете в PvP.");
 		if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Вы участвуете в гонке.");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы уже телепортировась на dm. Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы уже телепортировась на dm. Введите /exitdm, чтобы выйти.");
 		if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 		if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_BORDO, "Ошибка: Вы не должны находиться в транспорте!");
 		tmp = strtok(cmdtext, idx);
@@ -3592,7 +3601,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(PlayerInfo[playerid][pMoney] < 1000) return SendClientMessage(playerid, -1, "У вас нехватает денег.");
 		PlayerInfo[playerid][pMoney] -= 1000;
 		GameTextForPlayer(playerid, "~r~-1000$", 1000, 1);
-		PlayerInfo[playerid][pInDm] = dmzone;
+		PlayerInfo[playerid][pDmZone] = dmzone;
 		if(dmzone != 8)
 		{
 			format(string, sizeof string, "*** %s телепортировался на dm зону № %d (/dm %d)", PlayerInfo[playerid][pName], dmzone, dmzone);
@@ -3683,17 +3692,17 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	}
 	if(!strcmp(cmd, "/exitdm", true))
 	{
-		if(PlayerInfo[playerid][pInDm] < 1) return SendClientMessage(playerid, COLOR_YELLOW, "Вы не находитесь на dm!");
+		if(PlayerInfo[playerid][pDmZone] < 1) return SendClientMessage(playerid, COLOR_YELLOW, "Вы не находитесь на dm!");
 		SendClientMessage(playerid, COLOR_YELLOW, "*** Вы вышли с dm");
 		SetPlayerWorldBounds(playerid, 20000.0, -20000.0, 20000.0, -20000.0);
-		PlayerInfo[playerid][pInDm] = 0;
+		PlayerInfo[playerid][pDmZone] = 0;
 		return 1;
 	}
 	if(!strcmp(cmd, "/pvp", true))
 	{
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы уже участвуете в PvP.");
 		if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Вы участвуете в гонке.");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 		if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 		if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, -1, "Ошибка: Вы не должны находиться в транспорте");
 		tmp = strtok(cmdtext, idx);
@@ -3705,7 +3714,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(!PlayerInfo[player][pPvpAccept]) return SendClientMessage(playerid, COLOR_YELLOW, "Игрок отключил возможность участия в PVP");
 		if(PlayerInfo[player][pInPvp]) return SendClientMessage(playerid, -1, "Этот игрок уже участвует в PvP.");
 		if(PlayerInfo[player][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Этот игрок участвует в гонке.");
-		if(PlayerInfo[player][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Игрок находится на dm!");
+		if(PlayerInfo[player][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Игрок находится на dm!");
 		if(PlayerInfo[player][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Этот игрок отбывает наказание!");
 		if(PlayerInfo[player][pJail]) return SendClientMessage(playerid, COLOR_RED, "Ошибка: Данный игрок в тюрьме!");
 		tmp = strtok(cmdtext, idx);
@@ -3755,7 +3764,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы участвуете в PvP.");
 		if(RaceStarted) return SendClientMessage(playerid, COLOR_RED_RACE, "Гонка уже запущена! Подождите, пока она закончится!");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 		if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 		if(!RaceBusy) return SendClientMessage(playerid, COLOR_RED_RACE, "На данный момент нет гонки, к которой можно присоединиться!");
 		if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "Вы уже участвуете в гонке!");
@@ -3772,7 +3781,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	if(!strcmp(cmd, "/exitrace", true))
 	{
 		if(!PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "Вы не участвуете в гонке!");
-		JoinCount--;
+		RaceJoinCount--;
 		StopPlayerRace(playerid);
 		TogglePlayerControllable(playerid, 1);
 		SetCameraBehindPlayer(playerid);
@@ -3784,10 +3793,10 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(PlayerInfo[playerid][pMineStatus] > 0) return SendClientMessage(playerid, -1, " Вы уже установили мину!");
 		new Float:X, Float:Y, Float:Z;
 		GetPlayerPos(playerid, X, Y, Z);
-		PlayerInfo[playerid][pMine][0] = CreateObject(2992, X, Y, Z - 0.85, 0.0, 0.0, 0.0);
-		PlayerInfo[playerid][pMine][1] = CreateObject(19290, X, Y, Z - 0.85, 0.0, 0.0, 0.0);
+		PlayerInfo[playerid][pMineObj][0] = CreateObject(2992, X, Y, Z - 0.85, 0.0, 0.0, 0.0);
+		PlayerInfo[playerid][pMineObj][1] = CreateObject(19290, X, Y, Z - 0.85, 0.0, 0.0, 0.0);
 		PlayerInfo[playerid][pMineLabel] = Text3D:-1;
-		PlayerInfo[playerid][pMinePickup] = -1;
+		PlayerInfo[playerid][pMinePick] = -1;
 		PlayerInfo[playerid][pMineStatus] = 1;
 		PlayerInfo[playerid][pMineCount] = 11;
 		MineCount(playerid);
@@ -3986,7 +3995,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы участвуете в PvP.");
 		if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Вы участвуете в гонке.");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 		ShowPlayerDialog(playerid, DIALOG_GANG, DIALOG_STYLE_LIST, "{FFFF00}Меню банды", "Создать банду\nНазначить скины\nНазначить место спавна\nНазначить уровень\nОбщак банды\nПригласить в банду\nВыгнать из банды\nИзменить цвет банды\nИзменить название банды\nВкл/выкл тега банды\nУйти из банды", "Выбрать", "Отмена");
 		return 1;
 	}
@@ -3998,7 +4007,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		{
 			if(Gang[i])
 			{
-				format(string, sizeof string, "%d. Банда \"%s\"\n", i, GName[i]);
+				format(string, sizeof string, "%d. Банда \"%s\"\n", i, GangName[i]);
 				strcat(string2, string);
 			}
 		}
@@ -4030,7 +4039,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(iniFile >= INI_OK)
 		{
 			string[0] = EOS;
-			static name[MAX_PLAYER_NAME];
+			static name[MAX_PLAYER_NAME + 1];
 			for(new i, time, TempTime1, TempTime2, TempTime3; i < 5; i++)
 			{
 				format(string2, sizeof string2, "BestRacerTime_%d", i);
@@ -4053,13 +4062,13 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		{
 			case TEAM_MAFIA, TEAM_ADMIN:
 			{
-				MoveObject(iGate, 2223.8757, -2205.9118, 13.5468, 2.5);
-				MoveObject(iGate4, 2223.8757, -2205.9118, 13.5468, 2.5);
+				MoveObject(iGateObj, 2223.8757, -2205.9118, 13.5468, 2.5);
+				MoveObject(iGate4Obj, 2223.8757, -2205.9118, 13.5468, 2.5);
 				GameTextForPlayer(playerid, "~w~BOPOЏA OЏKP‘BA”ЏC•, ЊO„A†‡YCЏA „ѓ…ЏE...", 4000, 3);
 			}
 			case TEAM_ARMY:
 			{
-				MoveObject(iGate2, 2720.827, -2414.449, 13.46094, 3.0);
+				MoveObject(iGate2Obj, 2720.827, -2414.449, 13.46094, 3.0);
 				GameTextForPlayer(playerid, "~w~BOPOЏA OЏKP‘BA”ЏC•, ЊO„A†‡YCЏA „ѓ…ЏE...", 4000, 3);
 			}
 			default: return SendClientMessage(playerid, COLOR_BORDO, "Ваша банда не может открывать ворота!");
@@ -4072,12 +4081,12 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		{
 			case TEAM_ADMIN:
 			{
-				MoveObject(iGate3, 2720.827, -2514.226, 13.4609, 3.0);
+				MoveObject(iGate3Obj, 2720.827, -2514.226, 13.4609, 3.0);
 				GameTextForPlayer(playerid, "BOPOЏA OЏKP‘BA”ЏC•, ЊO„A†‡YCЏA „ѓ…ЏE...", 4000, 3);
 			}
 			case TEAM_ARMY:
 			{
-				MoveObject(iGate3, 2720.827, -2514.226, 13.4609, 3.0);
+				MoveObject(iGate3Obj, 2720.827, -2514.226, 13.4609, 3.0);
 				GameTextForPlayer(playerid, "~w~BOPOЏA OЏKP‘BA”ЏC•, ЊO„A†‡YCЏA „ѓ…ЏE...", 4000, 3);
 			}
 			default: return SendClientMessage(playerid, COLOR_BORDO, "Ваша банда не может открывать ворота!");
@@ -4090,13 +4099,13 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		{
 			case TEAM_ADMIN, TEAM_MAFIA:
 			{
-				MoveObject(iGate, 2233.8757, -2214.9118, 13.5468, 2.5);
-				MoveObject(iGate4, 2236.8757, -2217.9118, 13.5468, 2.5);
+				MoveObject(iGateObj, 2233.8757, -2214.9118, 13.5468, 2.5);
+				MoveObject(iGate4Obj, 2236.8757, -2217.9118, 13.5468, 2.5);
 				GameTextForPlayer(playerid, "~w~BOPOЏA €AKP‘BA”ЏC•, ЊO„A†‡YCЏA „ѓ…ЏE...", 4000, 3);
 			}
 			case TEAM_ARMY:
 			{
-				MoveObject(iGate2, 2720.827, -2405.449, 13.4609, 2.5);
+				MoveObject(iGate2Obj, 2720.827, -2405.449, 13.4609, 2.5);
 				GameTextForPlayer(playerid, "~w~BOPOЏA €AKP‘BA”ЏC•, ЊO„A†‡YCЏA „ѓ…ЏE...", 4000, 3);
 			}
 			default: return SendClientMessage(playerid, COLOR_BORDO, "Ваша банда не может закрывать ворота!");
@@ -4109,7 +4118,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		{
 			case TEAM_ADMIN, TEAM_ARMY:
 			{
-				MoveObject(iGate3, 2720.827, -2504.226, 13.4609, 2.5);
+				MoveObject(iGate3Obj, 2720.827, -2504.226, 13.4609, 2.5);
 				GameTextForPlayer(playerid, "~w~BOPOЏA €AKP‘BA”ЏC•, ЊO„A†‡YCЏA „ѓ…ЏE...", 4000, 3);
 			}
 			default: return SendClientMessage(playerid, COLOR_BORDO, "Ваша банда не может закрывать ворота!");
@@ -4120,10 +4129,10 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(PlayerInfo[playerid][pTeam] == TEAM_ADMIN)
 		{
-			MoveObject(iGate, 2233.8757, -2214.9118, 13.5468, 2.5);
-			MoveObject(iGate4, 2236.8757, -2217.9118, 13.5468, 2.5);
-			MoveObject(iGate2, 2720.827, -2405.449, 13.4609, 2.5);
-			MoveObject(iGate3, 2720.827, -2504.226, 13.4609, 2.5);
+			MoveObject(iGateObj, 2233.8757, -2214.9118, 13.5468, 2.5);
+			MoveObject(iGate4Obj, 2236.8757, -2217.9118, 13.5468, 2.5);
+			MoveObject(iGate2Obj, 2720.827, -2405.449, 13.4609, 2.5);
+			MoveObject(iGate3Obj, 2720.827, -2504.226, 13.4609, 2.5);
 			GameTextForPlayer(playerid, "~w~BOPOЏA €AKP‘BA”ЏC•, ЊO„A†‡YCЏA „ѓ…ЏE...", 4000, 3);
 		}
 		return 1;
@@ -4132,7 +4141,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	{
 		if(!IsPlayerAdminEx(playerid, 1)) return SendClientMessage(playerid, COLOR_RED_RACE, "Вы не являетесь администратором!");
 		if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы участвуете в PvP.");
-		if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+		if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 		if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 		if(AutomaticRace) return SendClientMessage(playerid, COLOR_RED_RACE, "Данное действие невозможно, включена автоматическая гонка!");
 		if(BuildRace > 0) return SendClientMessage(playerid, COLOR_RED_RACE, "На данный момент кто-то уже создаёт гонку!");
@@ -4725,14 +4734,14 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(time < 1) return SendClientMessage(playerid, COLOR_GRAY, "Время отсидки указано неверно!");
 		tmp = strtok(cmdtext, idx);
 		if(!tmp[0]) return SendClientMessage(playerid, COLOR_RED, "Используйте: /jail [id] [время (мин)] [причина]");
-		if(PlayerInfo[player][pInDm] > 0)
+		if(PlayerInfo[player][pDmZone] > 0)
 		{
 			SetPlayerWorldBounds(player, 20000.0, -20000.0, 20000.0, -20000.0);
-			PlayerInfo[player][pInDm] = 0;
+			PlayerInfo[player][pDmZone] = 0;
 		}
 		else if(PlayerInfo[player][pInRace])
 		{
-			JoinCount--;
+			RaceJoinCount--;
 			StopPlayerRace(player);
 		}
 		else if(PlayerInfo[player][pInPvp])
@@ -5274,7 +5283,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(!IsPlayerAdminEx(playerid, 8)) return SendClientMessage(playerid, COLOR_RED, "Вы не уполномочены использовать эту команду!");
 		tmp = strtok(cmdtext, idx);
 		if(!tmp[0]) return SendClientMessage(playerid, COLOR_RED, "Используйте: /unban [name]");
-		new pname[MAX_PLAYER_NAME];
+		new pname[MAX_PLAYER_NAME + 1];
 		strmid(pname, tmp, 0, strlen(tmp));
 		format(string, sizeof string, "Users/%s.ini", pname);
 		if(!fexist(string)) return SendClientMessage(playerid, COLOR_RED, "Такого аккаунта не существует!");
@@ -5382,7 +5391,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(!IsPlayerConnected(player)) return SendClientMessage(playerid, COLOR_GRAY, "Данный игрок оффлайн!");
 		tmp = strtok(cmdtext, idx);
 		if(!tmp[0]) return SendClientMessage(playerid, COLOR_RED, "Используйте: /setname [id] [name]");
-		new pname[MAX_PLAYER_NAME];
+		new pname[MAX_PLAYER_NAME + 1];
 		strmid(pname, cmdtext, 11, strlen(cmdtext));
 		format(string, sizeof string, "Users/%s.ini", pname);
 		new ret = SetPlayerName(player, pname);
@@ -5401,7 +5410,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		SendClientMessage(player, COLOR_BLUE, string);
 		format(string, sizeof string, "Users/%s.ini", PlayerInfo[player][pName]);
 		fremove(string);
-		GetPlayerName(player, PlayerInfo[player][pName], MAX_PLAYER_NAME);
+		GetPlayerName(player, PlayerInfo[player][pName], MAX_PLAYER_NAME + 1);
 		SaveAccount(player);
 		return 1;
 	}
@@ -5470,16 +5479,16 @@ public OnPlayerCommandText(playerid, cmdtext[])
 
 public OnPlayerUpdate(playerid)
 {
-	if(GetPlayerWeapon(playerid) > 0 && GetPlayerInterior(playerid) > 0 && PlayerInfo[playerid][pInDm] < 1 && !PlayerInfo[playerid][pInPvp]) SetPlayerArmedWeapon(playerid, 0);
+	if(GetPlayerWeapon(playerid) > 0 && GetPlayerInterior(playerid) > 0 && PlayerInfo[playerid][pDmZone] < 1 && !PlayerInfo[playerid][pInPvp]) SetPlayerArmedWeapon(playerid, 0);
 	if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
 	{
 		new vid = GetPlayerVehicleID(playerid), panels, doors, lights, tires;
 		GetVehicleDamageStatus(vid, panels, doors, lights, tires);
 		for(new i = GetPlayerPoolSize(), Float:sx, Float:sy, Float:sz; i >= 0; --i)
 		{
-			if(IsPlayerConnected(i) && PlayerInfo[i][pSpikes] > 0)
+			if(IsPlayerConnected(i) && PlayerInfo[i][pSpikesObj] > 0)
 			{
-				GetObjectPos(PlayerInfo[i][pSpikes], sx, sy, sz);
+				GetObjectPos(PlayerInfo[i][pSpikesObj], sx, sy, sz);
 				if(IsPlayerInRangeOfPoint(playerid, 3.0, sx, sy, sz))
 				{
 					tires = encode_tires(1, 1, 1, 1);
@@ -5517,17 +5526,17 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 			SendClientMessage(playerid, COLOR_SALMON, "Всё ваше оружие изьято для предотвращения ДБ.");
 			if(PlayerInfo[playerid][pTeam] != TEAM_ADMIN)
 			{
-				if(PlayerInfo[playerid][pTeam] != TEAM_ARMY && vehid == Dumper)
+				if(PlayerInfo[playerid][pTeam] != TEAM_ARMY && vehid == DumperVeh)
 				{
 					GameTextForPlayer(playerid, "Get Out Of Army's Dumper", 3000, 3);
 					RemovePlayerFromVehicle(playerid);
 				}
-				if(vehid == Panzer)
+				if(vehid == PanzerVeh)
 				{
 					GameTextForPlayer(playerid, "This Tank Is For Admin Use Only", 3000, 3);
 					RemovePlayerFromVehicle(playerid);
 				}
-				else if(vehid == Hydra1 || vehid == Hydra2)
+				else if(vehid == Hydra1Veh || vehid == Hydra2Veh)
 				{
 					GameTextForPlayer(playerid, "‹‘‡E€…_…€_–OE†_–AЋ…м‘!", 3000, 3);
 					RemovePlayerFromVehicle(playerid);
@@ -5559,9 +5568,9 @@ public OnPlayerGiveDamage(playerid, damagedid, Float:amount, weaponid, bodypart)
 	static string[64];
 	format(string, sizeof string, "~n~~n~~n~~n~~n~~n~~n~~g~+%.01f HP", amount);
 	GameTextForPlayer(playerid, string, 1500, 3);
-	if(PlayerInfo[damagedid][pGang] > 0 && GSpawn[PlayerInfo[damagedid][pGang]][0] && GSpawn[PlayerInfo[damagedid][pGang]][1] && GSpawn[PlayerInfo[damagedid][pGang]][2])
+	if(PlayerInfo[damagedid][pGang] > 0 && GangSpawn[PlayerInfo[damagedid][pGang]][0] && GangSpawn[PlayerInfo[damagedid][pGang]][1] && GangSpawn[PlayerInfo[damagedid][pGang]][2])
 	{
-		if(IsPlayerInRangeOfPoint(damagedid, 1.5, GSpawn[PlayerInfo[damagedid][pGang]][0], GSpawn[PlayerInfo[damagedid][pGang]][1], GSpawn[PlayerInfo[damagedid][pGang]][2])) Punish(playerid);
+		if(IsPlayerInRangeOfPoint(damagedid, 1.5, GangSpawn[PlayerInfo[damagedid][pGang]][0], GangSpawn[PlayerInfo[damagedid][pGang]][1], GangSpawn[PlayerInfo[damagedid][pGang]][2])) Punish(playerid);
 	}
 	else if(IsPlayerInRangeOfPoint(damagedid, 1.5, TeamSpawns[PlayerInfo[damagedid][pTeam]][0], TeamSpawns[PlayerInfo[damagedid][pTeam]][1], TeamSpawns[PlayerInfo[damagedid][pTeam]][2])) Punish(playerid);
 	return 1;
@@ -5574,7 +5583,7 @@ public OnPlayerTakeDamage(playerid, issuerid, Float:amount, weaponid, bodypart)
 		static string[64];
 		format(string, sizeof string, "~n~~n~~n~~n~~n~~n~~n~~r~-%.01f HP", amount);
 		GameTextForPlayer(playerid, string, 1500, 3);
-		if(PlayerInfo[playerid][pInDm] == 8)
+		if(PlayerInfo[playerid][pDmZone] == 8)
 		{
 			new Float:health;
 			GetPlayerHealth(playerid, health);
@@ -5864,7 +5873,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					ini_getInteger(iniFile, "Gang", PlayerInfo[playerid][pGang]);
 					ini_getInteger(iniFile, "GangCheck", PlayerInfo[playerid][pGangCheck]);
 					ini_getInteger(iniFile, "GangLvl", PlayerInfo[playerid][pGangLvl]);
-					if(!Gang[PlayerInfo[playerid][pGang]] || GCheck[PlayerInfo[playerid][pGang]] != PlayerInfo[playerid][pGangCheck])
+					if(!Gang[PlayerInfo[playerid][pGang]] || GangCheck[PlayerInfo[playerid][pGang]] != PlayerInfo[playerid][pGangCheck])
 					{
 						PlayerInfo[playerid][pGang] = 0;
 						PlayerInfo[playerid][pGangCheck] = 0;
@@ -5899,7 +5908,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 						}
 					}
 					SetPlayerScore(playerid, PlayerInfo[playerid][pKills]);
-					if(PlayerInfo[playerid][pGang] > 0) SetPlayerColor(playerid, HexToInt(GColor[PlayerInfo[playerid][pGang]]));
+					if(PlayerInfo[playerid][pGang] > 0) SetPlayerColor(playerid, HexToInt(GangColor[PlayerInfo[playerid][pGang]]));
 					PlayerInfo[playerid][pConnectCount]++;
 					PlayerInfo[playerid][pLogged] = true;
 					if(IsPlayerAdminEx(playerid, 1))
@@ -6453,17 +6462,17 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					{
 						if(PlayerInfo[playerid][pInPvp]) return SendClientMessage(playerid, -1, "Вы уже участвуете в PvP.");
 						if(PlayerInfo[playerid][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Вы участвуете в гонке.");
-						if(PlayerInfo[playerid][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
+						if(PlayerInfo[playerid][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Вы находитесь на dm! Введите /exitdm, чтобы выйти.");
 						if(PlayerInfo[playerid][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Вы отбываете наказание!");
 						if(PlayerInfo[playerid][pJail]) return SendClientMessage(playerid, COLOR_RED, "Ошибка: Вы находитесь в тюрьме!");
 						if(IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, -1, "Ошибка: Вы не должны находиться в транспорте");
-						if(IsPlayerInAnyVehicle(PlayerInfo[playerid][pClicked])) return SendClientMessage(playerid, -1, "Ошибка: Игрок не должен находиться в транспорте");
-						if(!PlayerInfo[PlayerInfo[playerid][pClicked]][pPvpAccept]) return SendClientMessage(playerid, COLOR_YELLOW, "Игрок отключил возможность участия в PVP");
-						if(PlayerInfo[PlayerInfo[playerid][pClicked]][pInPvp]) return SendClientMessage(playerid, -1, "Этот игрок уже участвует в PvP.");
-						if(PlayerInfo[PlayerInfo[playerid][pClicked]][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Этот игрок участвует в гонке.");
-						if(PlayerInfo[PlayerInfo[playerid][pClicked]][pInDm] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Игрок находится на dm!");
-						if(PlayerInfo[PlayerInfo[playerid][pClicked]][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Этот игрок отбывает наказание!");
-						if(PlayerInfo[PlayerInfo[playerid][pClicked]][pJail]) return SendClientMessage(playerid, COLOR_RED, "Ошибка: Данный игрок в тюрьме!");
+						if(IsPlayerInAnyVehicle(PlayerInfo[playerid][pClickedId])) return SendClientMessage(playerid, -1, "Ошибка: Игрок не должен находиться в транспорте");
+						if(!PlayerInfo[PlayerInfo[playerid][pClickedId]][pPvpAccept]) return SendClientMessage(playerid, COLOR_YELLOW, "Игрок отключил возможность участия в PVP");
+						if(PlayerInfo[PlayerInfo[playerid][pClickedId]][pInPvp]) return SendClientMessage(playerid, -1, "Этот игрок уже участвует в PvP.");
+						if(PlayerInfo[PlayerInfo[playerid][pClickedId]][pInRace]) return SendClientMessage(playerid, COLOR_RED_RACE, "*** Ошибка: Этот игрок участвует в гонке.");
+						if(PlayerInfo[PlayerInfo[playerid][pClickedId]][pDmZone] > 0) return SendClientMessage(playerid, COLOR_YELLOW, "Игрок находится на dm!");
+						if(PlayerInfo[PlayerInfo[playerid][pClickedId]][pPunish]) return SendClientMessage(playerid, COLOR_YELLOW, "Этот игрок отбывает наказание!");
+						if(PlayerInfo[PlayerInfo[playerid][pClickedId]][pJail]) return SendClientMessage(playerid, COLOR_RED, "Ошибка: Данный игрок в тюрьме!");
 						ShowPlayerDialog(playerid, DIALOG_PVP_INVITE_1, DIALOG_STYLE_INPUT, "{FFFF00}Пригласить на PVP", "Укажите ID оружия ниже:", "Ок", "Назад");
 					}
 					case 3: ShowPlayerDialog(playerid, DIALOG_REPORT, DIALOG_STYLE_INPUT, "{FFFF00}Написать жалобу", "Напишите текст жалобы ниже:", "Ок", "Назад");
@@ -6472,19 +6481,19 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 						if(PlayerInfo[playerid][pGang] > 0 && PlayerInfo[playerid][pGangLvl] >= 4)
 						{
 							PlayerInfo[playerid][pDialog] = DIALOG_GANG_INVITE;
-							valstr(string, PlayerInfo[playerid][pClicked]);
+							valstr(string, PlayerInfo[playerid][pClickedId]);
 							OnDialogResponse(playerid, DIALOG_GANG_INVITE, 1, 0, string);
 						}
 						else SendClientMessage(playerid, COLOR_RED_GANG, "Вы должны состоять в банде, и у вас должен быть как минимум 4 уровень.");
 					}
 					case 5:
 					{
-						format(string, sizeof string, "/stats %d", PlayerInfo[playerid][pClicked]);
+						format(string, sizeof string, "/stats %d", PlayerInfo[playerid][pClickedId]);
 						OnPlayerCommandText(playerid, string);
 					}
 					case 6:
 					{
-						PlayerInfo[playerid][pPointsId] = PlayerInfo[playerid][pClicked];
+						PlayerInfo[playerid][pPointsId] = PlayerInfo[playerid][pClickedId];
 						ShowPlayerDialog(playerid, DIALOG_DMPOINTS_GIVE_2, DIALOG_STYLE_INPUT, "{FFFF00}Передать очки", "Укажите количество очков, которое хотите передать:", "Ок", "Назад");
 					}
 				}
@@ -6583,12 +6592,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			if(response)
 			{
 				if(!inputtext[0]) return ShowPlayerDialog(playerid, DIALOG_PM, DIALOG_STYLE_INPUT, "{FFFF00}Написать PM", "Напишите ваше сообщение ниже:", "Ок", "Назад");
-				format(string, sizeof string, "/pm %d %s", PlayerInfo[playerid][pClicked], inputtext);
+				format(string, sizeof string, "/pm %d %s", PlayerInfo[playerid][pClickedId], inputtext);
 				OnPlayerCommandText(playerid, string);
 			}
 			else
 			{
-				format(string, sizeof string, "{FFFF00}%s(ID: %d)", PlayerInfo[PlayerInfo[playerid][pClicked]][pName], PlayerInfo[playerid][pClicked]);
+				format(string, sizeof string, "{FFFF00}%s(ID: %d)", PlayerInfo[PlayerInfo[playerid][pClickedId]][pName], PlayerInfo[playerid][pClickedId]);
 				ShowPlayerDialog(playerid, DIALOG_PLAYER_MENU, DIALOG_STYLE_LIST, string, "Написать PM\nПередать деньги\nПригласить на PVP\nНаписать жалобу\nПригласить в банду\nПосмотреть статистику\nПередать DM-очки", "Выбрать", "Отмена");
 			}
 		}
@@ -6597,12 +6606,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			if(response)
 			{
 				if(!inputtext[0]) return ShowPlayerDialog(playerid, DIALOG_PM, DIALOG_STYLE_INPUT, "{FFFF00}Передать деньги", "Укажите ниже нужную сумму для передачи:", "Ок", "Назад");
-				format(string, sizeof string, "/givemoney %d %d", PlayerInfo[playerid][pClicked], strval(inputtext));
+				format(string, sizeof string, "/givemoney %d %d", PlayerInfo[playerid][pClickedId], strval(inputtext));
 				OnPlayerCommandText(playerid, string);
 			}
 			else
 			{
-				format(string, sizeof string, "{FFFF00}%s(ID: %d)", PlayerInfo[PlayerInfo[playerid][pClicked]][pName], PlayerInfo[playerid][pClicked]);
+				format(string, sizeof string, "{FFFF00}%s(ID: %d)", PlayerInfo[PlayerInfo[playerid][pClickedId]][pName], PlayerInfo[playerid][pClickedId]);
 				ShowPlayerDialog(playerid, DIALOG_PLAYER_MENU, DIALOG_STYLE_LIST, string, "Написать PM\nПередать деньги\nПригласить на PVP\nНаписать жалобу\nПригласить в банду\nПосмотреть статистику\nПередать DM-очки", "Выбрать", "Отмена");
 			}
 		}
@@ -6611,12 +6620,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			if(response)
 			{
 				if(!inputtext[0]) return ShowPlayerDialog(playerid, DIALOG_REPORT, DIALOG_STYLE_INPUT, "{FFFF00}Написать жалобу", "Напишите текст жалобы ниже:", "Ок", "Назад");
-				format(string, sizeof string, "/report %d %s", PlayerInfo[playerid][pClicked], inputtext);
+				format(string, sizeof string, "/report %d %s", PlayerInfo[playerid][pClickedId], inputtext);
 				OnPlayerCommandText(playerid, string);
 			}
 			else
 			{
-				format(string, sizeof string, "{FFFF00}%s(ID: %d)", PlayerInfo[PlayerInfo[playerid][pClicked]][pName], PlayerInfo[playerid][pClicked]);
+				format(string, sizeof string, "{FFFF00}%s(ID: %d)", PlayerInfo[PlayerInfo[playerid][pClickedId]][pName], PlayerInfo[playerid][pClickedId]);
 				ShowPlayerDialog(playerid, DIALOG_PLAYER_MENU, DIALOG_STYLE_LIST, string, "Написать PM\nПередать деньги\nПригласить на PVP\nНаписать жалобу\nПригласить в банду\nПосмотреть статистику\nПередать DM-очки", "Выбрать", "Отмена");
 			}
 		}
@@ -6639,7 +6648,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			else
 			{
-				format(string, sizeof string, "{FFFF00}%s(ID: %d)", PlayerInfo[PlayerInfo[playerid][pClicked]][pName], PlayerInfo[playerid][pClicked]);
+				format(string, sizeof string, "{FFFF00}%s(ID: %d)", PlayerInfo[PlayerInfo[playerid][pClickedId]][pName], PlayerInfo[playerid][pClickedId]);
 				ShowPlayerDialog(playerid, DIALOG_PLAYER_MENU, DIALOG_STYLE_LIST, string, "Написать PM\nПередать деньги\nПригласить на PVP\nНаписать жалобу\nПригласить в банду\nПосмотреть статистику\nПередать DM-очки", "Выбрать", "Отмена");
 			}
 		}
@@ -6699,17 +6708,17 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					ShowPlayerDialog(playerid, DIALOG_PVP_INVITE_4, DIALOG_STYLE_INPUT, "{FFFF00}Пригласить на PVP", "Укажите сумму ставки ниже:", "Ок", "Назад");
 					return 1;
 				}
-				if(PlayerInfo[playerid][pPvpMoney] > PlayerInfo[PlayerInfo[playerid][pClicked]][pMoney])
+				if(PlayerInfo[playerid][pPvpMoney] > PlayerInfo[PlayerInfo[playerid][pClickedId]][pMoney])
 				{
 					SendClientMessage(playerid, -1, "У противника нехватает денег.");
 					ShowPlayerDialog(playerid, DIALOG_PVP_INVITE_4, DIALOG_STYLE_INPUT, "{FFFF00}Пригласить на PVP", "Укажите сумму ставки ниже:", "Ок", "Назад");
 					return 1;
 				}
-				PlayerInfo[PlayerInfo[playerid][pClicked]][pPvpCreate] = playerid;
-				format(string, sizeof string, "Вы успешно пригласили игрока {9DDAF2}%s{FFFFFF} на PVP! Дождитесь ответа.", PlayerInfo[PlayerInfo[playerid][pClicked]][pName]);
+				PlayerInfo[PlayerInfo[playerid][pClickedId]][pPvpCreate] = playerid;
+				format(string, sizeof string, "Вы успешно пригласили игрока {9DDAF2}%s{FFFFFF} на PVP! Дождитесь ответа.", PlayerInfo[PlayerInfo[playerid][pClickedId]][pName]);
 				SendClientMessage(playerid, -1, string);
 				format(string, sizeof string, "Игрок %s приглашает тебя на PVP.\n\nОружие: %d\nБроня: %d\nМесто: %d\nСтавка: %d$", PlayerInfo[playerid][pName], PlayerInfo[playerid][pPvpWeapon], PlayerInfo[playerid][pPvpArmour], PlayerInfo[playerid][pPvpPlace], PlayerInfo[playerid][pPvpMoney]);
-				ShowPlayerDialog(PlayerInfo[playerid][pClicked], DIALOG_PVP, DIALOG_STYLE_MSGBOX, "{FFFF00}Приглашение на PVP", string, "Да", "Нет");
+				ShowPlayerDialog(PlayerInfo[playerid][pClickedId], DIALOG_PVP, DIALOG_STYLE_MSGBOX, "{FFFF00}Приглашение на PVP", string, "Да", "Нет");
 			}
 			else ShowPlayerDialog(playerid, DIALOG_PVP_INVITE_3, DIALOG_STYLE_INPUT, "{FFFF00}Пригласить на PVP", "Укажите место (1-5) ниже:", "Ок", "Назад");
 		}
@@ -6760,7 +6769,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			if(!response) return ShowPlayerDialog(playerid, DIALOG_TUNING, DIALOG_STYLE_LIST, "{FFFF00}Меню тюнинга", "Нитро\nЦвет авто\nКолёса\nStereo\nГидравлика\nКомпоненты авто", "Выбрать", "Выход");
 			new color1, color2, vehid = GetPlayerVehicleID(playerid);
 			GetVehicleColor(vehid, color1, color2);
-			ChangeVehicleColor(vehid, Carray[listitem], color2);
+			ChangeVehicleColor(vehid, ColorsArray[listitem], color2);
 			ShowPlayerDialog(playerid, DIALOG_TUNING_COLOR_2, DIALOG_STYLE_LIST, "{FFFF00}Цвет авто 2", "Белый\nЧёрный\nОранжевый\nГолубой\nТёмно Синий\nКоричневый\nЗелёный\nТёмно красный\nСерый", "Ок", "Назад");
 		}
 		case DIALOG_TUNING_COLOR_2:
@@ -6768,12 +6777,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			if(!response) return ShowPlayerDialog(playerid, DIALOG_TUNING_COLOR, DIALOG_STYLE_LIST, "{FFFF00}Цвет авто 1", "Белый\nЧёрный\nОранжевый\nГолубой\nТёмно Синий\nКоричневый\nЗелёный\nТёмно красный\nСерый", "Ок", "Назад");
 			new color1, color2, vehid = GetPlayerVehicleID(playerid);
 			GetVehicleColor(vehid, color1, color2);
-			ChangeVehicleColor(vehid, color1, Carray[listitem]);
+			ChangeVehicleColor(vehid, color1, ColorsArray[listitem]);
 			ShowPlayerDialog(playerid, DIALOG_TUNING, DIALOG_STYLE_LIST, "{FFFF00}Меню тюнинга", "Нитро\nЦвет авто\nКолёса\nStereo\nГидравлика\nКомпоненты авто", "Выбрать", "Выход");
 		}
 		case DIALOG_TUNING_WHEELS:
 		{
-			if(response) AddVehicleComponent(GetPlayerVehicleID(playerid), Warray[listitem]);
+			if(response) AddVehicleComponent(GetPlayerVehicleID(playerid), WheelsArray[listitem]);
 			ShowPlayerDialog(playerid, DIALOG_TUNING, DIALOG_STYLE_LIST, "{FFFF00}Меню тюнинга", "Нитро\nЦвет авто\nКолёса\nStereo\nГидравлика\nКомпоненты авто", "Выбрать", "Выход");
 		}
 		case DIALOG_TUNING_PAINTJOB_1:
@@ -7179,17 +7188,17 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		}
 		case DIALOG_TUNING_SPOILERS_1:
 		{
-			if(response) AddVehicleComponent(GetPlayerVehicleID(playerid), Xarray1[listitem]);
+			if(response) AddVehicleComponent(GetPlayerVehicleID(playerid), SpoilersArray[listitem]);
 			RegularCarDialog(playerid);
 		}
 		case DIALOG_TUNING_SPOILERS_2:
 		{
-			if(response) AddVehicleComponent(GetPlayerVehicleID(playerid), Xarray2[listitem]);
+			if(response) AddVehicleComponent(GetPlayerVehicleID(playerid), HoodsArray[listitem]);
 			RegularCarDialog(playerid);
 		}
 		case DIALOG_TUNING_LIGHTS:
 		{
-			if(response) AddVehicleComponent(GetPlayerVehicleID(playerid), Xarray3[listitem]);
+			if(response) AddVehicleComponent(GetPlayerVehicleID(playerid), LampsArray[listitem]);
 			RegularCarDialog(playerid);
 		}
 		case DIALOG_TUNING_VENTS:
@@ -7252,7 +7261,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					{
 						if(PlayerInfo[playerid][pGang] > 0)
 						{
-							format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GName[PlayerInfo[playerid][pGang]]);
+							format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GangName[PlayerInfo[playerid][pGang]]);
 							ShowPlayerDialog(playerid, DIALOG_GANG_STOCK, DIALOG_STYLE_LIST, string, "Посмотреть общак\nПоложить деньги\nВзять деньги\nПоложить DM-очки\nВзять DM-очки", "Выбрать", "Назад");
 						}
 						else SendClientMessage(playerid, COLOR_RED_GANG, "Вы должны состоять в банде.");
@@ -7281,14 +7290,14 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					{
 						if(PlayerInfo[playerid][pGang] > 0 && PlayerInfo[playerid][pGangLvl] == 6)
 						{
-							format(string, sizeof string, "Вы %s тег вашей банды", GTag[PlayerInfo[playerid][pGang]] ? ("отключили") : ("включили"));
+							format(string, sizeof string, "Вы %s тег вашей банды", GangTag[PlayerInfo[playerid][pGang]] ? ("отключили") : ("включили"));
 							SendClientMessage(playerid, COLOR_YELLOW_2, string);
-							GTag[PlayerInfo[playerid][pGang]] = !GTag[PlayerInfo[playerid][pGang]];
+							GangTag[PlayerInfo[playerid][pGang]] = !GangTag[PlayerInfo[playerid][pGang]];
 							format(string, sizeof string, "Gangs/%d.ini", PlayerInfo[playerid][pGang]);
 							new iniFile = ini_openFile(string);
 							if(iniFile >= INI_OK)
 							{
-								ini_setInteger(iniFile, "Tag", GTag[PlayerInfo[playerid][pGang]]);
+								ini_setInteger(iniFile, "Tag", GangTag[PlayerInfo[playerid][pGang]]);
 								ini_closeFile(iniFile);
 							}
 						}
@@ -7308,7 +7317,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			{
 				CheckDialogColor(inputtext);
 				if(!inputtext[0]) return ShowPlayerDialog(playerid, DIALOG_GANG_CREATE, DIALOG_STYLE_INPUT, "{FF0000}Создание банды", "Введите название банды:", "Принять", "Отмена");
-				format(GangName[playerid], sizeof GangName[], inputtext);
+				format(GangTempName[playerid], sizeof GangTempName[], inputtext);
 				ShowPlayerDialog(playerid, DIALOG_GANG_CREATE_COLOR, DIALOG_STYLE_INPUT, "{FF0000}Создание банды", "Введите цвет банды:", "Принять", "Отмена");
 			}
 			else ShowPlayerDialog(playerid, DIALOG_GANG, DIALOG_STYLE_LIST, "{FFFF00}Меню банды", "Создать банду\nНазначить скины\nНазначить место спавна\nНазначить уровень\nОбщак банды\nПригласить в банду\nВыгнать из банды\nИзменить цвет банды\nИзменить название банды\nВкл/выкл тега банды\nУйти из банды", "Выбрать", "Отмена");
@@ -7329,7 +7338,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					ini_closeFile(iniFile);
 					format(string, sizeof string, "Скин успешно установлен! ID скина: %d", skin);
 					SendClientMessage(playerid, COLOR_YELLOW_2, string);
-					GSkin[PlayerInfo[playerid][pGang]][PlayerInfo[playerid][pGangSkin] - 1] = skin;
+					GangSkin[PlayerInfo[playerid][pGang]][PlayerInfo[playerid][pGangSkin] - 1] = skin;
 					for(new i = GetPlayerPoolSize(); i >= 0; --i)
 					{
 						if(IsPlayerConnected(i) && PlayerInfo[i][pGang] == PlayerInfo[playerid][pGang] && PlayerInfo[i][pGangLvl] == PlayerInfo[playerid][pGangSkin]) SetPlayerSkin(i, skin);
@@ -7347,11 +7356,11 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				new player = strval(inputtext);
 				if(!IsPlayerConnected(player)) return SendClientMessage(playerid, -1, "Этот игрок не в игре!");
 				if(PlayerInfo[player][pGang] > 0) return SendClientMessage(playerid, -1, "Этот игрок уже в банде!");
-				format(string, sizeof string, "Игрок %s пригласил Вас в банду '%s'", PlayerInfo[playerid][pName], GName[PlayerInfo[playerid][pGang]]);
+				format(string, sizeof string, "Игрок %s пригласил Вас в банду '%s'", PlayerInfo[playerid][pName], GangName[PlayerInfo[playerid][pGang]]);
 				ShowPlayerDialog(player, DIALOG_GANG_INV_ACCEPT, DIALOG_STYLE_MSGBOX, "{FF0000}Приглашение в банду", string, "Принять", "Отказать");
 				format(string, sizeof string, "Лидер '%s' выслал приглашение игроку '%s'", PlayerInfo[playerid][pName], PlayerInfo[player][pName]);
 				SendClientMessageToGang(PlayerInfo[playerid][pGang], COLOR_RED_GANG, string);
-				PlayerInfo[player][pTgang] = PlayerInfo[playerid][pGang];
+				PlayerInfo[player][pTempGang] = PlayerInfo[playerid][pGang];
 			}
 			else ShowPlayerDialog(playerid, DIALOG_GANG, DIALOG_STYLE_LIST, "{FFFF00}Меню банды", "Создать банду\nНазначить скины\nНазначить место спавна\nНазначить уровень\nОбщак банды\nПригласить в банду\nВыгнать из банды\nИзменить цвет банды\nИзменить название банды\nВкл/выкл тега банды\nУйти из банды", "Выбрать", "Отмена");
 		}
@@ -7366,7 +7375,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				}
 				if(PlayerInfo[playerid][pGangLvl] == 6)
 				{
-					printf("Лидер %s удалил банду %s", PlayerInfo[playerid][pName], GName[PlayerInfo[playerid][pGang]]);
+					printf("Лидер %s удалил банду %s", PlayerInfo[playerid][pName], GangName[PlayerInfo[playerid][pGang]]);
 					DestroyGang(PlayerInfo[playerid][pGang]);
 					SendClientMessage(playerid, COLOR_YELLOW_2, "Ваша банда успешно удалена!");
 					return 1;
@@ -7388,21 +7397,21 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				}
 				new Float:x, Float:y, Float:z;
 				GetPlayerPos(playerid, x, y, z);
-				GSpawn[PlayerInfo[playerid][pGang]][0] = x;
-				GSpawn[PlayerInfo[playerid][pGang]][1] = y;
-				GSpawn[PlayerInfo[playerid][pGang]][2] = z;
-				GSpawnInt[PlayerInfo[playerid][pGang]] = GetPlayerInterior(playerid);
-				DestroyPickup(GPick[PlayerInfo[playerid][pGang]]);
-				Delete3DTextLabel(GLabel[PlayerInfo[playerid][pGang]]);
+				GangSpawn[PlayerInfo[playerid][pGang]][0] = x;
+				GangSpawn[PlayerInfo[playerid][pGang]][1] = y;
+				GangSpawn[PlayerInfo[playerid][pGang]][2] = z;
+				GangSpawnInt[PlayerInfo[playerid][pGang]] = GetPlayerInterior(playerid);
+				DestroyPickup(GangPick[PlayerInfo[playerid][pGang]]);
+				Delete3DTextLabel(GangLabel[PlayerInfo[playerid][pGang]]);
 				PlayerInfo[playerid][pMoney] -= 300000;
-				format(string, sizeof string, "Респ банды .:: %s ::.", GName[PlayerInfo[playerid][pGang]]);
-				GLabel[PlayerInfo[playerid][pGang]] = Create3DTextLabel(string, COLOR_LIME, x, y, z, 15.0, 0, 0);
-				GPick[PlayerInfo[playerid][pGang]] = CreatePickup(1559, 1, x, y, z, -1);
+				format(string, sizeof string, "Респ банды .:: %s ::.", GangName[PlayerInfo[playerid][pGang]]);
+				GangLabel[PlayerInfo[playerid][pGang]] = Create3DTextLabel(string, COLOR_LIME, x, y, z, 15.0, 0, 0);
+				GangPick[PlayerInfo[playerid][pGang]] = CreatePickup(1559, 1, x, y, z, -1);
 				format(string, sizeof string, "Gangs/%d.ini", PlayerInfo[playerid][pGang]);
 				new iniFile = ini_openFile(string);
 				if(iniFile >= INI_OK)
 				{
-					ini_setInteger(iniFile, "SpawnInt", GSpawnInt[PlayerInfo[playerid][pGang]]);
+					ini_setInteger(iniFile, "SpawnInt", GangSpawnInt[PlayerInfo[playerid][pGang]]);
 					ini_setFloat(iniFile, "SpawnX", x);
 					ini_setFloat(iniFile, "SpawnY", y);
 					ini_setFloat(iniFile, "SpawnZ", z);
@@ -7443,7 +7452,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				SendClientMessage(playerid, COLOR_YELLOW_2, string);
 				format(string, sizeof string, "Лидер %s выдал Вам уровень %d", PlayerInfo[playerid][pName], PlayerInfo[PlayerInfo[playerid][pId]][pGangLvl]);
 				SendClientMessage(PlayerInfo[playerid][pId], COLOR_YELLOW_2, string);
-				if(GSkin[PlayerInfo[playerid][pGang]][PlayerInfo[PlayerInfo[playerid][pId]][pGangLvl]] >= 0) SetPlayerSkin(PlayerInfo[playerid][pId], GSkin[PlayerInfo[playerid][pGang]][PlayerInfo[PlayerInfo[playerid][pId]][pGangLvl] - 1]);
+				if(GangSkin[PlayerInfo[playerid][pGang]][PlayerInfo[PlayerInfo[playerid][pId]][pGangLvl]] >= 0) SetPlayerSkin(PlayerInfo[playerid][pId], GangSkin[PlayerInfo[playerid][pGang]][PlayerInfo[PlayerInfo[playerid][pId]][pGangLvl] - 1]);
 				PlayerInfo[playerid][pId] = -1;
 			}
 			else ShowPlayerDialog(playerid, DIALOG_GANG_LEVEL_ID, DIALOG_STYLE_INPUT, "{FF0000}Назначение уровня", "Введите id игрока, которому хотите назначить уровень:", "Принять", "Отмена");
@@ -7457,8 +7466,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					case 0:
 					{
 						static string2[64];
-						format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GName[PlayerInfo[playerid][pGang]]);
-						format(string2, sizeof string2, "Денег в общаке: $%d\nDM очков в общаке: %d", GMoney[PlayerInfo[playerid][pGang]], GDMPoints[PlayerInfo[playerid][pGang]]);
+						format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GangName[PlayerInfo[playerid][pGang]]);
+						format(string2, sizeof string2, "Денег в общаке: $%d\nDM очков в общаке: %d", GangMoney[PlayerInfo[playerid][pGang]], GangDmPoints[PlayerInfo[playerid][pGang]]);
 						ShowPlayerDialog(playerid, DIALOG_GANG_STOCK_AMOUNT, DIALOG_STYLE_MSGBOX, string, string2, "Ок", "");
 					}
 					case 1: ShowPlayerDialog(playerid, DIALOG_GANG_STOCK_GIVE, DIALOG_STYLE_INPUT, "{FFFF00}Положить деньги", "Укажите сумму, которую вы хотите положить в общак:", "Ок", "Назад");
@@ -7479,7 +7488,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		}
 		case DIALOG_GANG_STOCK_AMOUNT:
 		{
-			format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GName[PlayerInfo[playerid][pGang]]);
+			format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GangName[PlayerInfo[playerid][pGang]]);
 			ShowPlayerDialog(playerid, DIALOG_GANG_STOCK, DIALOG_STYLE_LIST, string, "Посмотреть общак\nПоложить деньги\nВзять деньги\nПоложить DM-очки\nВзять DM-очки", "Выбрать", "Назад");
 		}
 		case DIALOG_GANG_STOCK_GIVE:
@@ -7499,12 +7508,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					return ShowPlayerDialog(playerid, DIALOG_GANG_STOCK_GIVE, DIALOG_STYLE_INPUT, "{FFFF00}Положить деньги", "Укажите сумму, которую вы хотите положить в общак:", "Ок", "Назад");
 				}
 				PlayerInfo[playerid][pMoney] -= amount;
-				GMoney[PlayerInfo[playerid][pGang]] += amount;
+				GangMoney[PlayerInfo[playerid][pGang]] += amount;
 				format(string, sizeof string, "Gangs/%d.ini", PlayerInfo[playerid][pGang]);
 				new iniFile = ini_openFile(string);
 				if(iniFile >= INI_OK)
 				{
-					ini_setInteger(iniFile, "Money", GMoney[PlayerInfo[playerid][pGang]]);
+					ini_setInteger(iniFile, "Money", GangMoney[PlayerInfo[playerid][pGang]]);
 					ini_closeFile(iniFile);
 					format(string, sizeof string, "Игрок %s положил $%d в общак банды", PlayerInfo[playerid][pName], amount);
 					SendClientMessageToGang(PlayerInfo[playerid][pGang], COLOR_YELLOW, string);
@@ -7514,7 +7523,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			else
 			{
-				format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GName[PlayerInfo[playerid][pGang]]);
+				format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GangName[PlayerInfo[playerid][pGang]]);
 				ShowPlayerDialog(playerid, DIALOG_GANG_STOCK, DIALOG_STYLE_LIST, string, "Посмотреть общак\nПоложить деньги\nВзять деньги\nПоложить DM-очки\nВзять DM-очки", "Выбрать", "Назад");
 			}
 		}
@@ -7529,18 +7538,18 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					SendClientMessage(playerid, COLOR_RED_GANG, "Вы указали неверную сумму!");
 					return ShowPlayerDialog(playerid, DIALOG_GANG_STOCK_TAKE, DIALOG_STYLE_INPUT, "{FFFF00}Взять деньги", "Укажите сумму, которую вы хотите взять с общака:", "Ок", "Назад");
 				}
-				if(amount > GMoney[PlayerInfo[playerid][pGang]])
+				if(amount > GangMoney[PlayerInfo[playerid][pGang]])
 				{
 					SendClientMessage(playerid, COLOR_RED_GANG, "В общаке нехватает денег!");
 					return ShowPlayerDialog(playerid, DIALOG_GANG_STOCK_TAKE, DIALOG_STYLE_INPUT, "{FFFF00}Взять деньги", "Укажите сумму, которую вы хотите взять с общака:", "Ок", "Назад");
 				}
 				PlayerInfo[playerid][pMoney] += amount;
-				GMoney[PlayerInfo[playerid][pGang]] -= amount;
+				GangMoney[PlayerInfo[playerid][pGang]] -= amount;
 				format(string, sizeof string, "Gangs/%d.ini", PlayerInfo[playerid][pGang]);
 				new iniFile = ini_openFile(string);
 				if(iniFile >= INI_OK)
 				{
-					ini_setInteger(iniFile, "Money", GMoney[PlayerInfo[playerid][pGang]]);
+					ini_setInteger(iniFile, "Money", GangMoney[PlayerInfo[playerid][pGang]]);
 					ini_closeFile(iniFile);
 					format(string, sizeof string, "Игрок %s взял $%d из общака банды", PlayerInfo[playerid][pName], amount);
 					SendClientMessageToGang(PlayerInfo[playerid][pGang], COLOR_YELLOW, string);
@@ -7550,7 +7559,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			else
 			{
-				format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GName[PlayerInfo[playerid][pGang]]);
+				format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GangName[PlayerInfo[playerid][pGang]]);
 				ShowPlayerDialog(playerid, DIALOG_GANG_STOCK, DIALOG_STYLE_LIST, string, "Посмотреть общак\nПоложить деньги\nВзять деньги\nПоложить DM-очки\nВзять DM-очки", "Выбрать", "Назад");
 			}
 		}
@@ -7571,12 +7580,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					return ShowPlayerDialog(playerid, DIALOG_GANG_STOCK_GIVE_POINTS, DIALOG_STYLE_INPUT, "{FFFF00}Положить DM-очки", "Укажите количество DM-очков, которое вы хотите положить в общак:", "Ок", "Назад");
 				}
 				PlayerInfo[playerid][pDmPoints] -= amount;
-				GDMPoints[PlayerInfo[playerid][pGang]] += amount;
+				GangDmPoints[PlayerInfo[playerid][pGang]] += amount;
 				format(string, sizeof string, "Gangs/%d.ini", PlayerInfo[playerid][pGang]);
 				new iniFile = ini_openFile(string);
 				if(iniFile >= INI_OK)
 				{
-					ini_setInteger(iniFile, "DMPoints", GDMPoints[PlayerInfo[playerid][pGang]]);
+					ini_setInteger(iniFile, "DMPoints", GangDmPoints[PlayerInfo[playerid][pGang]]);
 					ini_closeFile(iniFile);
 					format(string, sizeof string, "Игрок %s положил %d DM-очков в общак банды", PlayerInfo[playerid][pName], amount);
 					SendClientMessageToGang(PlayerInfo[playerid][pGang], COLOR_YELLOW, string);
@@ -7586,7 +7595,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			else
 			{
-				format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GName[PlayerInfo[playerid][pGang]]);
+				format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GangName[PlayerInfo[playerid][pGang]]);
 				ShowPlayerDialog(playerid, DIALOG_GANG_STOCK, DIALOG_STYLE_LIST, string, "Посмотреть общак\nПоложить деньги\nВзять деньги\nПоложить DM-очки\nВзять DM-очки", "Выбрать", "Назад");
 			}
 		}
@@ -7601,18 +7610,18 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					SendClientMessage(playerid, COLOR_RED_GANG, "Вы указали неверное количество!");
 					return ShowPlayerDialog(playerid, DIALOG_GANG_STOCK_TAKE_POINTS, DIALOG_STYLE_INPUT, "{FFFF00}Взять DM-очки", "Укажите количество DM-очков, которое вы хотите взять с общака:", "Ок", "Назад");
 				}
-				if(amount > GDMPoints[PlayerInfo[playerid][pGang]])
+				if(amount > GangDmPoints[PlayerInfo[playerid][pGang]])
 				{
 					SendClientMessage(playerid, COLOR_RED_GANG, "В общаке нехватает DM-очков!");
 					return ShowPlayerDialog(playerid, DIALOG_GANG_STOCK_TAKE_POINTS, DIALOG_STYLE_INPUT, "{FFFF00}Взять DM-очки", "Укажите количество DM-очков, которое вы хотите взять с общака:", "Ок", "Назад");
 				}
 				PlayerInfo[playerid][pDmPoints] += amount;
-				GDMPoints[PlayerInfo[playerid][pGang]] -= amount;
+				GangDmPoints[PlayerInfo[playerid][pGang]] -= amount;
 				format(string, sizeof string, "Gangs/%d.ini", PlayerInfo[playerid][pGang]);
 				new iniFile = ini_openFile(string);
 				if(iniFile >= INI_OK)
 				{
-					ini_setInteger(iniFile, "DMPoints", GDMPoints[PlayerInfo[playerid][pGang]]);
+					ini_setInteger(iniFile, "DMPoints", GangDmPoints[PlayerInfo[playerid][pGang]]);
 					ini_closeFile(iniFile);
 					format(string, sizeof string, "Игрок %s взял %d DM-очков из общака банды", PlayerInfo[playerid][pName], amount);
 					SendClientMessageToGang(PlayerInfo[playerid][pGang], COLOR_YELLOW, string);
@@ -7622,7 +7631,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			else
 			{
-				format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GName[PlayerInfo[playerid][pGang]]);
+				format(string, sizeof string, "{FFFF00}Общак банды \"%s\"", GangName[PlayerInfo[playerid][pGang]]);
 				ShowPlayerDialog(playerid, DIALOG_GANG_STOCK, DIALOG_STYLE_LIST, string, "Посмотреть общак\nПоложить деньги\nВзять деньги\nПоложить DM-очки\nВзять DM-очки", "Выбрать", "Назад");
 			}
 		}
@@ -7656,15 +7665,15 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					return 1;
 				}
 				LowerToUpper(inputtext);
-				format(GColor[PlayerInfo[playerid][pGang]], sizeof GColor[], "%sFF", inputtext);
-				SetPlayerColor(playerid, HexToInt(GColor[PlayerInfo[playerid][pGang]]));
-				format(string, sizeof string, "Теперь цвет вашей банды: {%s}%s", inputtext, GColor[PlayerInfo[playerid][pGang]]);
+				format(GangColor[PlayerInfo[playerid][pGang]], sizeof GangColor[], "%sFF", inputtext);
+				SetPlayerColor(playerid, HexToInt(GangColor[PlayerInfo[playerid][pGang]]));
+				format(string, sizeof string, "Теперь цвет вашей банды: {%s}%s", inputtext, GangColor[PlayerInfo[playerid][pGang]]);
 				SendClientMessage(playerid, COLOR_LIME_GANG, string);
 				format(string, sizeof string, "Gangs/%d.ini", PlayerInfo[playerid][pGang]);
 				new iniFile = ini_openFile(string);
 				if(iniFile >= INI_OK)
 				{
-					ini_setString(iniFile, "Color", GColor[PlayerInfo[playerid][pGang]]);
+					ini_setString(iniFile, "Color", GangColor[PlayerInfo[playerid][pGang]]);
 					ini_closeFile(iniFile);
 				}
 			}
@@ -7676,9 +7685,9 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			{
 				CheckDialogColor(inputtext);
 				if(!inputtext[0]) return ShowPlayerDialog(playerid, DIALOG_GANG_NAME, DIALOG_STYLE_INPUT, "{FF0000}Смена названия", "Введите новое название банды\nв поле ниже:", "Принять", "Отмена");
-				format(GName[PlayerInfo[playerid][pGang]], sizeof GName[], "%s", inputtext);
-				format(string, sizeof string, "Респ банды .:: %s ::.", GName[PlayerInfo[playerid][pGang]]);
-				if(_:GLabel[PlayerInfo[playerid][pGang]] != -1) Update3DTextLabelText(GLabel[PlayerInfo[playerid][pGang]], COLOR_LIME, string);
+				format(GangName[PlayerInfo[playerid][pGang]], sizeof GangName[], "%s", inputtext);
+				format(string, sizeof string, "Респ банды .:: %s ::.", GangName[PlayerInfo[playerid][pGang]]);
+				if(_:GangLabel[PlayerInfo[playerid][pGang]] != -1) Update3DTextLabelText(GangLabel[PlayerInfo[playerid][pGang]], COLOR_LIME, string);
 				format(string, sizeof string, "{FFFF00}Вы успешно изменили название банды!\nНовое название банды: {FF0000}%s\n", inputtext);
 				ShowPlayerDialog(playerid, DIALOG_GANG_NAME_CHANGED, DIALOG_STYLE_MSGBOX, "{FF0000}Смена названия", string, "Ок", "");
 				format(string, sizeof string, "Gangs/%d.ini", PlayerInfo[playerid][pGang]);
@@ -7686,7 +7695,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				new iniFile = ini_openFile(string);
 				if(iniFile >= INI_OK)
 				{
-					ini_setString(iniFile, "Name", GName[PlayerInfo[playerid][pGang]]);
+					ini_setString(iniFile, "Name", GangName[PlayerInfo[playerid][pGang]]);
 					ini_closeFile(iniFile);
 				}
 			}
@@ -7705,11 +7714,11 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			if(response)
 			{
-				PlayerInfo[playerid][pGang] = PlayerInfo[playerid][pTgang];
-				PlayerInfo[playerid][pGangCheck] = GCheck[PlayerInfo[playerid][pGang]];
+				PlayerInfo[playerid][pGang] = PlayerInfo[playerid][pTempGang];
+				PlayerInfo[playerid][pGangCheck] = GangCheck[PlayerInfo[playerid][pGang]];
 				PlayerInfo[playerid][pGangLvl] = 1;
-				SetPlayerColor(playerid, HexToInt(GColor[PlayerInfo[playerid][pGang]]));
-				format(string, sizeof string, "Вы вступили в банду '%s'", GName[PlayerInfo[playerid][pGang]]);
+				SetPlayerColor(playerid, HexToInt(GangColor[PlayerInfo[playerid][pGang]]));
+				format(string, sizeof string, "Вы вступили в банду '%s'", GangName[PlayerInfo[playerid][pGang]]);
 				SendClientMessage(playerid, -1, string);
 				format(string, sizeof string, "%s вступил в банду!", PlayerInfo[playerid][pName]);
 				SendClientMessageToGang(PlayerInfo[playerid][pGang], COLOR_YELLOW_2, string);
@@ -7717,8 +7726,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			else
 			{
 				format(string, sizeof string, "%s отказался от вступления в банду!", PlayerInfo[playerid][pName]);
-				SendClientMessageToGang(PlayerInfo[playerid][pTgang], COLOR_YELLOW_2, string);
-				PlayerInfo[playerid][pTgang] = 0;
+				SendClientMessageToGang(PlayerInfo[playerid][pTempGang], COLOR_YELLOW_2, string);
+				PlayerInfo[playerid][pTempGang] = 0;
 			}
 		}
 		case DIALOG_GANG_CREATE_COLOR:
@@ -7743,25 +7752,25 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					PlayerInfo[playerid][pGangLvl] = 6;
 					PlayerInfo[playerid][pGang] = fgang;
 					Gang[PlayerInfo[playerid][pGang]] = true;
-					GTag[PlayerInfo[playerid][pGang]] = true;
+					GangTag[PlayerInfo[playerid][pGang]] = true;
 					PlayerInfo[playerid][pGangCheck] = gettime();
-					GCheck[PlayerInfo[playerid][pGang]] = PlayerInfo[playerid][pGangCheck];
-					format(GName[PlayerInfo[playerid][pGang]], sizeof GName[], GangName[playerid]);
+					GangCheck[PlayerInfo[playerid][pGang]] = PlayerInfo[playerid][pGangCheck];
+					format(GangName[PlayerInfo[playerid][pGang]], sizeof GangName[], GangTempName[playerid]);
 					LowerToUpper(inputtext);
-					format(GColor[PlayerInfo[playerid][pGang]], sizeof GColor[], "%sFF", inputtext);
+					format(GangColor[PlayerInfo[playerid][pGang]], sizeof GangColor[], "%sFF", inputtext);
 					format(string, sizeof string, "%d/%d/%d", day, month, year);
-					SetPlayerColor(playerid, HexToInt(GColor[PlayerInfo[playerid][pGang]]));
+					SetPlayerColor(playerid, HexToInt(GangColor[PlayerInfo[playerid][pGang]]));
 					PlayerInfo[playerid][pMoney] -= 300000;
-					GPick[PlayerInfo[playerid][pGang]] = -1;
-					GLabel[PlayerInfo[playerid][pGang]] = Text3D:-1;
-					printf("%s создал банду %s", PlayerInfo[playerid][pName], GName[PlayerInfo[playerid][pGang]]);
-					format(string2, sizeof string2, "{FFFF00}Банда успешно создана!\r\n{FFFF00}Название банды: %s\r\n{FFFF00}Цвет банды: {%s}%s\r\n{FFFF00}Дата основания: {FFFFFF}%s", GName[PlayerInfo[playerid][pGang]], inputtext, GColor[PlayerInfo[playerid][pGang]], string);
+					GangPick[PlayerInfo[playerid][pGang]] = -1;
+					GangLabel[PlayerInfo[playerid][pGang]] = Text3D:-1;
+					printf("%s создал банду %s", PlayerInfo[playerid][pName], GangName[PlayerInfo[playerid][pGang]]);
+					format(string2, sizeof string2, "{FFFF00}Банда успешно создана!\r\n{FFFF00}Название банды: %s\r\n{FFFF00}Цвет банды: {%s}%s\r\n{FFFF00}Дата основания: {FFFFFF}%s", GangName[PlayerInfo[playerid][pGang]], inputtext, GangColor[PlayerInfo[playerid][pGang]], string);
 					ShowPlayerDialog(playerid, DIALOG_GANG_CREATED, DIALOG_STYLE_MSGBOX, "{FF0000}Создание банды", string2, "Принять", "");
-					ini_setString(iniFile, "Name", GName[PlayerInfo[playerid][pGang]]);
-					ini_setString(iniFile, "Color", GColor[PlayerInfo[playerid][pGang]]);
-					ini_setInteger(iniFile, "Check", GCheck[PlayerInfo[playerid][pGang]]);
-					ini_setInteger(iniFile, "Money", GMoney[PlayerInfo[playerid][pGang]]);
-					ini_setInteger(iniFile, "DMPoints", GDMPoints[PlayerInfo[playerid][pGang]]);
+					ini_setString(iniFile, "Name", GangName[PlayerInfo[playerid][pGang]]);
+					ini_setString(iniFile, "Color", GangColor[PlayerInfo[playerid][pGang]]);
+					ini_setInteger(iniFile, "Check", GangCheck[PlayerInfo[playerid][pGang]]);
+					ini_setInteger(iniFile, "Money", GangMoney[PlayerInfo[playerid][pGang]]);
+					ini_setInteger(iniFile, "DMPoints", GangDmPoints[PlayerInfo[playerid][pGang]]);
 					ini_setInteger(iniFile, "SpawnInt", 0);
 					ini_setFloat(iniFile, "SpawnX", 0.0);
 					ini_setFloat(iniFile, "SpawnY", 0.0);
@@ -7795,7 +7804,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					}
 				}
 				PlayerInfo[playerid][pGangId] = sgang;
-				format(string, sizeof string, "{FFFF00}Банда \"%s\"", GName[sgang]);
+				format(string, sizeof string, "{FFFF00}Банда \"%s\"", GangName[sgang]);
 				ShowPlayerDialog(playerid, DIALOG_GANGS_MENU, DIALOG_STYLE_LIST, string, "Члены банды онлайн\nВызвать на поединок", "Выбрать", "Назад");
 			}
 		}
@@ -7825,7 +7834,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 						if(PlayerInfo[playerid][pGang] <= 0 || PlayerInfo[playerid][pGangLvl] < 6) return SendClientMessage(playerid, COLOR_RED_GANG, "Вы должны состоять в банде, и у вас должен быть уровень лидера.");
 						if(PlayerInfo[playerid][pGang] == PlayerInfo[playerid][pGangId]) return SendClientMessage(playerid, COLOR_RED_GANG, "Вы должны состоять в другой банде.");
 						if(GetGangLeader(PlayerInfo[playerid][pGangId]) == INVALID_PLAYER_ID) return SendClientMessage(playerid, COLOR_RED_GANG, "Лидер противоположной банды оффлайн.");
-						format(string, sizeof string, "Вы действительно хотите вызвать на поединок банду \"%s\"?", GName[PlayerInfo[playerid][pGangId]]);
+						format(string, sizeof string, "Вы действительно хотите вызвать на поединок банду \"%s\"?", GangName[PlayerInfo[playerid][pGangId]]);
 						ShowPlayerDialog(playerid, DIALOG_GANG_BATTLE, DIALOG_STYLE_MSGBOX, "{FFFF00}Вызвать на поединок", string, "Ок", "Назад");
 					}
 				}
@@ -7834,7 +7843,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		}
 		case DIALOG_GANG_ONLINE:
 		{
-			format(string, sizeof string, "{FFFF00}Банда \"%s\"", GName[PlayerInfo[playerid][pGangId]]);
+			format(string, sizeof string, "{FFFF00}Банда \"%s\"", GangName[PlayerInfo[playerid][pGangId]]);
 			ShowPlayerDialog(playerid, DIALOG_GANGS_MENU, DIALOG_STYLE_LIST, string, "Члены банды онлайн\nВызвать на поединок", "Выбрать", "Назад");
 		}
 		case DIALOG_GANG_BATTLE:
@@ -7843,14 +7852,14 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			{
 				new gleader = GetGangLeader(PlayerInfo[playerid][pGangId]);
 				if(gleader == INVALID_PLAYER_ID) return SendClientMessage(playerid, COLOR_RED_GANG, "Лидер противоположной банды оффлайн.");
-				format(string, sizeof string, "Банда \"%s\" приглашает вашу банду на поединок.\nСогласиться на поединок?", GName[PlayerInfo[playerid][pGang]]);
+				format(string, sizeof string, "Банда \"%s\" приглашает вашу банду на поединок.\nСогласиться на поединок?", GangName[PlayerInfo[playerid][pGang]]);
 				ShowPlayerDialog(gleader, DIALOG_GANG_BATTLE_ACCEPT, DIALOG_STYLE_MSGBOX, "{FFFF00}Вызов на поединок", string, "Ок", "Отмена");
 				PlayerInfo[gleader][pBattleId] = PlayerInfo[playerid][pGang];
 				SendClientMessage(playerid, -1, "Приглашение на поединок отправлено.");
 			}
 			else
 			{
-				format(string, sizeof string, "{FFFF00}Банда \"%s\"", GName[PlayerInfo[playerid][pGangId]]);
+				format(string, sizeof string, "{FFFF00}Банда \"%s\"", GangName[PlayerInfo[playerid][pGangId]]);
 				ShowPlayerDialog(playerid, DIALOG_GANGS_MENU, DIALOG_STYLE_LIST, string, "Члены банды онлайн\nВызвать на поединок", "Выбрать", "Назад");
 			}
 		}
@@ -7877,10 +7886,10 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			else
 			{
 				new gleader = GetGangLeader(PlayerInfo[playerid][pBattleId]);
-				format(string, sizeof string, "Вы отказались от участия в поединке с бандой \"%s\"", GName[PlayerInfo[playerid][pBattleId]]);
+				format(string, sizeof string, "Вы отказались от участия в поединке с бандой \"%s\"", GangName[PlayerInfo[playerid][pBattleId]]);
 				SendClientMessage(playerid, COLOR_YELLOW, string);
 				if(gleader == INVALID_PLAYER_ID) return 1;
-				format(string, sizeof string, "Банда \"%s\" отказалась от участия в поединке!", GName[PlayerInfo[gleader][pGangId]]);
+				format(string, sizeof string, "Банда \"%s\" отказалась от участия в поединке!", GangName[PlayerInfo[gleader][pGangId]]);
 				SendClientMessageToGang(PlayerInfo[playerid][pBattleId], COLOR_YELLOW, string);
 			}
 		}
@@ -7938,209 +7947,209 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				case 0:
 				{
 					PlayerInfo[playerid][pNeonStatus] = true;
-					DestroyObject(PlayerInfo[playerid][pNeon][0]);
-					DestroyObject(PlayerInfo[playerid][pNeon][1]);
-					DestroyObject(PlayerInfo[playerid][pNeon][2]);
-					PlayerInfo[playerid][pNeon][2] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][3]);
-					PlayerInfo[playerid][pNeon][3] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][4]);
-					PlayerInfo[playerid][pNeon][4] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][5]);
-					PlayerInfo[playerid][pNeon][5] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][6]);
-					PlayerInfo[playerid][pNeon][6] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][7]);
-					PlayerInfo[playerid][pNeon][7] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][8]);
-					PlayerInfo[playerid][pNeon][8] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][9]);
-					PlayerInfo[playerid][pNeon][9] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][10]);
-					PlayerInfo[playerid][pNeon][10] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][11]);
-					PlayerInfo[playerid][pNeon][11] = 0;
-					PlayerInfo[playerid][pNeon][0] = CreateObject(18648, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					PlayerInfo[playerid][pNeon][1] = CreateObject(18648, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][0], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][1], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][0]);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][1]);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][2]);
+					PlayerInfo[playerid][pNeonObj][2] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][3]);
+					PlayerInfo[playerid][pNeonObj][3] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][4]);
+					PlayerInfo[playerid][pNeonObj][4] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][5]);
+					PlayerInfo[playerid][pNeonObj][5] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][6]);
+					PlayerInfo[playerid][pNeonObj][6] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][7]);
+					PlayerInfo[playerid][pNeonObj][7] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][8]);
+					PlayerInfo[playerid][pNeonObj][8] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][9]);
+					PlayerInfo[playerid][pNeonObj][9] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][10]);
+					PlayerInfo[playerid][pNeonObj][10] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][11]);
+					PlayerInfo[playerid][pNeonObj][11] = 0;
+					PlayerInfo[playerid][pNeonObj][0] = CreateObject(18648, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					PlayerInfo[playerid][pNeonObj][1] = CreateObject(18648, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][0], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][1], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
 				}
 				case 1:
 				{
 					PlayerInfo[playerid][pNeonStatus] = true;
-					DestroyObject(PlayerInfo[playerid][pNeon][0]);
-					PlayerInfo[playerid][pNeon][0] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][1]);
-					PlayerInfo[playerid][pNeon][1] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][2]);
-					DestroyObject(PlayerInfo[playerid][pNeon][3]);
-					DestroyObject(PlayerInfo[playerid][pNeon][4]);
-					PlayerInfo[playerid][pNeon][4] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][5]);
-					PlayerInfo[playerid][pNeon][5] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][6]);
-					PlayerInfo[playerid][pNeon][6] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][7]);
-					PlayerInfo[playerid][pNeon][7] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][8]);
-					PlayerInfo[playerid][pNeon][8] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][9]);
-					PlayerInfo[playerid][pNeon][9] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][10]);
-					PlayerInfo[playerid][pNeon][10] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][11]);
-					PlayerInfo[playerid][pNeon][11] = 0;
-					PlayerInfo[playerid][pNeon][2] = CreateObject(18647, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					PlayerInfo[playerid][pNeon][3] = CreateObject(18647, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][2], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][3], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][0]);
+					PlayerInfo[playerid][pNeonObj][0] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][1]);
+					PlayerInfo[playerid][pNeonObj][1] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][2]);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][3]);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][4]);
+					PlayerInfo[playerid][pNeonObj][4] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][5]);
+					PlayerInfo[playerid][pNeonObj][5] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][6]);
+					PlayerInfo[playerid][pNeonObj][6] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][7]);
+					PlayerInfo[playerid][pNeonObj][7] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][8]);
+					PlayerInfo[playerid][pNeonObj][8] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][9]);
+					PlayerInfo[playerid][pNeonObj][9] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][10]);
+					PlayerInfo[playerid][pNeonObj][10] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][11]);
+					PlayerInfo[playerid][pNeonObj][11] = 0;
+					PlayerInfo[playerid][pNeonObj][2] = CreateObject(18647, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					PlayerInfo[playerid][pNeonObj][3] = CreateObject(18647, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][2], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][3], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
 				}
 				case 2:
 				{
 					PlayerInfo[playerid][pNeonStatus] = true;
-					DestroyObject(PlayerInfo[playerid][pNeon][0]);
-					PlayerInfo[playerid][pNeon][0] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][1]);
-					PlayerInfo[playerid][pNeon][1] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][2]);
-					PlayerInfo[playerid][pNeon][2] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][3]);
-					PlayerInfo[playerid][pNeon][3] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][4]);
-					DestroyObject(PlayerInfo[playerid][pNeon][5]);
-					DestroyObject(PlayerInfo[playerid][pNeon][6]);
-					PlayerInfo[playerid][pNeon][6] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][7]);
-					PlayerInfo[playerid][pNeon][7] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][8]);
-					PlayerInfo[playerid][pNeon][8] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][9]);
-					PlayerInfo[playerid][pNeon][9] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][10]);
-					PlayerInfo[playerid][pNeon][10] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][11]);
-					PlayerInfo[playerid][pNeon][11] = 0;
-					PlayerInfo[playerid][pNeon][4] = CreateObject(18649, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					PlayerInfo[playerid][pNeon][5] = CreateObject(18649, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][4], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][5], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][0]);
+					PlayerInfo[playerid][pNeonObj][0] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][1]);
+					PlayerInfo[playerid][pNeonObj][1] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][2]);
+					PlayerInfo[playerid][pNeonObj][2] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][3]);
+					PlayerInfo[playerid][pNeonObj][3] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][4]);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][5]);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][6]);
+					PlayerInfo[playerid][pNeonObj][6] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][7]);
+					PlayerInfo[playerid][pNeonObj][7] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][8]);
+					PlayerInfo[playerid][pNeonObj][8] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][9]);
+					PlayerInfo[playerid][pNeonObj][9] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][10]);
+					PlayerInfo[playerid][pNeonObj][10] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][11]);
+					PlayerInfo[playerid][pNeonObj][11] = 0;
+					PlayerInfo[playerid][pNeonObj][4] = CreateObject(18649, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					PlayerInfo[playerid][pNeonObj][5] = CreateObject(18649, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][4], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][5], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
 				}
 				case 3:
 				{
 					PlayerInfo[playerid][pNeonStatus] = true;
-					DestroyObject(PlayerInfo[playerid][pNeon][0]);
-					PlayerInfo[playerid][pNeon][0] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][1]);
-					PlayerInfo[playerid][pNeon][1] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][2]);
-					PlayerInfo[playerid][pNeon][2] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][3]);
-					PlayerInfo[playerid][pNeon][3] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][4]);
-					PlayerInfo[playerid][pNeon][4] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][5]);
-					PlayerInfo[playerid][pNeon][5] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][6]);
-					DestroyObject(PlayerInfo[playerid][pNeon][7]);
-					DestroyObject(PlayerInfo[playerid][pNeon][8]);
-					PlayerInfo[playerid][pNeon][8] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][9]);
-					PlayerInfo[playerid][pNeon][9] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][10]);
-					PlayerInfo[playerid][pNeon][10] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][11]);
-					PlayerInfo[playerid][pNeon][11] = 0;
-					PlayerInfo[playerid][pNeon][6] = CreateObject(18652, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					PlayerInfo[playerid][pNeon][7] = CreateObject(18652, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][6], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][7], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][0]);
+					PlayerInfo[playerid][pNeonObj][0] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][1]);
+					PlayerInfo[playerid][pNeonObj][1] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][2]);
+					PlayerInfo[playerid][pNeonObj][2] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][3]);
+					PlayerInfo[playerid][pNeonObj][3] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][4]);
+					PlayerInfo[playerid][pNeonObj][4] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][5]);
+					PlayerInfo[playerid][pNeonObj][5] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][6]);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][7]);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][8]);
+					PlayerInfo[playerid][pNeonObj][8] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][9]);
+					PlayerInfo[playerid][pNeonObj][9] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][10]);
+					PlayerInfo[playerid][pNeonObj][10] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][11]);
+					PlayerInfo[playerid][pNeonObj][11] = 0;
+					PlayerInfo[playerid][pNeonObj][6] = CreateObject(18652, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					PlayerInfo[playerid][pNeonObj][7] = CreateObject(18652, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][6], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][7], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
 				}
 				case 4:
 				{
 					PlayerInfo[playerid][pNeonStatus] = true;
-					DestroyObject(PlayerInfo[playerid][pNeon][0]);
-					PlayerInfo[playerid][pNeon][0] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][1]);
-					PlayerInfo[playerid][pNeon][1] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][2]);
-					PlayerInfo[playerid][pNeon][2] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][3]);
-					PlayerInfo[playerid][pNeon][3] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][4]);
-					PlayerInfo[playerid][pNeon][4] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][5]);
-					PlayerInfo[playerid][pNeon][5] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][6]);
-					PlayerInfo[playerid][pNeon][6] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][7]);
-					PlayerInfo[playerid][pNeon][7] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][8]);
-					DestroyObject(PlayerInfo[playerid][pNeon][9]);
-					DestroyObject(PlayerInfo[playerid][pNeon][10]);
-					PlayerInfo[playerid][pNeon][10] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][11]);
-					PlayerInfo[playerid][pNeon][11] = 0;
-					PlayerInfo[playerid][pNeon][8] = CreateObject(18651, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					PlayerInfo[playerid][pNeon][9] = CreateObject(18651, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][8], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][9], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][0]);
+					PlayerInfo[playerid][pNeonObj][0] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][1]);
+					PlayerInfo[playerid][pNeonObj][1] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][2]);
+					PlayerInfo[playerid][pNeonObj][2] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][3]);
+					PlayerInfo[playerid][pNeonObj][3] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][4]);
+					PlayerInfo[playerid][pNeonObj][4] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][5]);
+					PlayerInfo[playerid][pNeonObj][5] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][6]);
+					PlayerInfo[playerid][pNeonObj][6] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][7]);
+					PlayerInfo[playerid][pNeonObj][7] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][8]);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][9]);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][10]);
+					PlayerInfo[playerid][pNeonObj][10] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][11]);
+					PlayerInfo[playerid][pNeonObj][11] = 0;
+					PlayerInfo[playerid][pNeonObj][8] = CreateObject(18651, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					PlayerInfo[playerid][pNeonObj][9] = CreateObject(18651, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][8], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][9], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
 				}
 				case 5:
 				{
 					PlayerInfo[playerid][pNeonStatus] = true;
-					DestroyObject(PlayerInfo[playerid][pNeon][0]);
-					PlayerInfo[playerid][pNeon][0] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][1]);
-					PlayerInfo[playerid][pNeon][1] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][2]);
-					PlayerInfo[playerid][pNeon][2] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][3]);
-					PlayerInfo[playerid][pNeon][3] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][4]);
-					PlayerInfo[playerid][pNeon][4] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][5]);
-					PlayerInfo[playerid][pNeon][5] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][6]);
-					PlayerInfo[playerid][pNeon][6] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][7]);
-					PlayerInfo[playerid][pNeon][7] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][8]);
-					PlayerInfo[playerid][pNeon][8] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][9]);
-					PlayerInfo[playerid][pNeon][9] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][10]);
-					DestroyObject(PlayerInfo[playerid][pNeon][11]);
-					PlayerInfo[playerid][pNeon][10] = CreateObject(18650, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					PlayerInfo[playerid][pNeon][11] = CreateObject(18650, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][10], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
-					AttachObjectToVehicle(PlayerInfo[playerid][pNeon][11], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][0]);
+					PlayerInfo[playerid][pNeonObj][0] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][1]);
+					PlayerInfo[playerid][pNeonObj][1] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][2]);
+					PlayerInfo[playerid][pNeonObj][2] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][3]);
+					PlayerInfo[playerid][pNeonObj][3] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][4]);
+					PlayerInfo[playerid][pNeonObj][4] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][5]);
+					PlayerInfo[playerid][pNeonObj][5] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][6]);
+					PlayerInfo[playerid][pNeonObj][6] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][7]);
+					PlayerInfo[playerid][pNeonObj][7] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][8]);
+					PlayerInfo[playerid][pNeonObj][8] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][9]);
+					PlayerInfo[playerid][pNeonObj][9] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][10]);
+					DestroyObject(PlayerInfo[playerid][pNeonObj][11]);
+					PlayerInfo[playerid][pNeonObj][10] = CreateObject(18650, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					PlayerInfo[playerid][pNeonObj][11] = CreateObject(18650, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][10], GetPlayerVehicleID(playerid), -0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
+					AttachObjectToVehicle(PlayerInfo[playerid][pNeonObj][11], GetPlayerVehicleID(playerid), 0.8, 0.0, -0.70, 0.0, 0.0, 0.0);
 				}
 				case 6:
 				{
-					DestroyObject(PlayerInfo[playerid][pNeon][0]);
-					PlayerInfo[playerid][pNeon][0] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][1]);
-					PlayerInfo[playerid][pNeon][1] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][2]);
-					PlayerInfo[playerid][pNeon][2] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][3]);
-					PlayerInfo[playerid][pNeon][3] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][4]);
-					PlayerInfo[playerid][pNeon][4] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][5]);
-					PlayerInfo[playerid][pNeon][5] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][6]);
-					PlayerInfo[playerid][pNeon][6] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][7]);
-					PlayerInfo[playerid][pNeon][7] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][8]);
-					PlayerInfo[playerid][pNeon][8] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][9]);
-					PlayerInfo[playerid][pNeon][9] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][10]);
-					PlayerInfo[playerid][pNeon][10] = 0;
-					DestroyObject(PlayerInfo[playerid][pNeon][11]);
-					PlayerInfo[playerid][pNeon][11] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][0]);
+					PlayerInfo[playerid][pNeonObj][0] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][1]);
+					PlayerInfo[playerid][pNeonObj][1] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][2]);
+					PlayerInfo[playerid][pNeonObj][2] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][3]);
+					PlayerInfo[playerid][pNeonObj][3] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][4]);
+					PlayerInfo[playerid][pNeonObj][4] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][5]);
+					PlayerInfo[playerid][pNeonObj][5] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][6]);
+					PlayerInfo[playerid][pNeonObj][6] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][7]);
+					PlayerInfo[playerid][pNeonObj][7] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][8]);
+					PlayerInfo[playerid][pNeonObj][8] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][9]);
+					PlayerInfo[playerid][pNeonObj][9] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][10]);
+					PlayerInfo[playerid][pNeonObj][10] = 0;
+					DestroyObject(PlayerInfo[playerid][pNeonObj][11]);
+					PlayerInfo[playerid][pNeonObj][11] = 0;
 					PlayerInfo[playerid][pNeonStatus] = false;
 				}
 			}
@@ -8195,16 +8204,16 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			if(!response) return ShowPlayerDialog(playerid, DIALOG_RACE_CREATE_3, DIALOG_STYLE_MSGBOX, "{FFFF00}Создание новой гонки (Этап 3/4)", RaceCreate3Str, "Ок", "Назад");
 			SendClientMessage(playerid, COLOR_GREEN_RACE, "RACE: Чтобы создать чекпоинт, нажмите 'KEY_FIRE'.");
 			SendClientMessage(playerid, COLOR_GREEN_RACE, " - ВАЖНО: Нажмите 'ENTER', когда Вы закончите! Если он не реагирует, нажмите его снова и снова.");
-			BuildTakeCheckpoints = true;
-			BuildCheckPointCount = 0;
+			BuildTakeCPs = true;
+			BuildCPCount = 0;
 		}
 		case DIALOG_RACE_CREATE_DONE:
 		{
 			if(!response) return ShowPlayerDialog(playerid, DIALOG_RACE_CREATE_DONE, DIALOG_STYLE_MSGBOX, "{FFFF00}Создание новой гонки (готово)", "Вы создали гонку и уже сейчас она готова к использованию.\n\n>> Нажмите 'Готово' для завершения. 'Выход' - для отмены.", "Готово", "Выход");
 			printf("Админ %s создал новую гонку %s", PlayerInfo[playerid][pName], BuildName);
 			DestroyVehicle(BuildVehicle);
-			BuildTakeCheckpoints = false;
-			BuildCheckPointCount = 0;
+			BuildCPCount = 0;
+			BuildTakeCPs = false;
 			BuildTakeVehPos = false;
 			BuildVehPosCount = 0;
 			BuildVehicle = 0;
@@ -8216,24 +8225,24 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 public OnObjectMoved(objectid)
 {
-	if(objectid == FerrisWheelObjects[10])
+	if(objectid == FerrisWheelObj[10])
 	{
 		SetTimer("RotateFerrisWheel", FERRIS_WHEEL_WAIT_TIME, 0);
 		return 1;
 	}
-	if(objectid == Balloon)
+	if(objectid == BalloonObj)
 	{
 		switch(BalloonStage)
 		{
-			case 1: MoveObject(Balloon, 908.4518, -2037.1908, 64.0458, 5.0);
-			case 2: MoveObject(Balloon, 994.5233, -2053.7102, 98.6453, 5.0);
-			case 3: MoveObject(Balloon, 1141.4609, -2061.4761, 116.945, 5.0);
-			case 4: MoveObject(Balloon, 1250.7042, -2025.9906, 119.145, 5.0);
-			case 5: MoveObject(Balloon, 1154.7401, -1884.9833, 109.8451, 5.0);
-			case 6: MoveObject(Balloon, 1010.0747, -1925.0986, 100.6452, 5.0);
-			case 7: MoveObject(Balloon, 919.6353, -1966.6344, 75.6456, 5.0);
-			case 8: MoveObject(Balloon, 875.8741, -1994.6158, 45.8461, 5.0);
-			case 9: MoveObject(Balloon, 836.08, -2000.51, 13.6, 5.0);
+			case 1: MoveObject(BalloonObj, 908.4518, -2037.1908, 64.0458, 5.0);
+			case 2: MoveObject(BalloonObj, 994.5233, -2053.7102, 98.6453, 5.0);
+			case 3: MoveObject(BalloonObj, 1141.4609, -2061.4761, 116.945, 5.0);
+			case 4: MoveObject(BalloonObj, 1250.7042, -2025.9906, 119.145, 5.0);
+			case 5: MoveObject(BalloonObj, 1154.7401, -1884.9833, 109.8451, 5.0);
+			case 6: MoveObject(BalloonObj, 1010.0747, -1925.0986, 100.6452, 5.0);
+			case 7: MoveObject(BalloonObj, 919.6353, -1966.6344, 75.6456, 5.0);
+			case 8: MoveObject(BalloonObj, 875.8741, -1994.6158, 45.8461, 5.0);
+			case 9: MoveObject(BalloonObj, 836.08, -2000.51, 13.6, 5.0);
 			case 10:
 			{
 				BalloonLabel = Create3DTextLabel("Для запуска воздушного шара\nвведите /start", COLOR_ELEVATOR, 836.1572, -2000.5112, 14.7462, 15.0, 0, 0);
@@ -8244,24 +8253,24 @@ public OnObjectMoved(objectid)
 		return 1;
 	}
 	new Float:x, Float:y, Float:z;
-	if(objectid == ObjElevator)
+	if(objectid == ElevatorObj)
 	{
 		KillTimer(ElevatorBoostTmr);
 		FloorRequestedBy[ElevatorFloor] = INVALID_PLAYER_ID;
 		ElevatorOpenDoors();
 		FloorOpenDoors(ElevatorFloor);
-		GetObjectPos(ObjElevator, x, y, z);
-		LabelElevator = Create3DTextLabel("Нажмите '~k~~CONVERSATION_YES~' для использования лифта", COLOR_ELEVATOR, 1784.9822, -1302.0426, z - 0.9, 4.0, 0, 1);
+		GetObjectPos(ElevatorObj, x, y, z);
+		ElevatorLabel = Create3DTextLabel("Нажмите '~k~~CONVERSATION_YES~' для использования лифта", COLOR_ELEVATOR, 1784.9822, -1302.0426, z - 0.9, 4.0, 0, 1);
 		ElevatorState = 1;
 		SetTimer("ElevatorTurnToIdle", ELEVATOR_WAIT_TIME, 0);
 		return 1;
 	}
-	for(new i; i < sizeof ObjFloorDoors; i++)
+	for(new i; i < sizeof FloorDoorsObj; i++)
 	{
-		if(objectid == ObjFloorDoors[i][0])
+		if(objectid == FloorDoorsObj[i][0])
 		{
-			GetObjectPos(ObjFloorDoors[i][0], x, y, z);
-			if(x < X_DOOR_L_OPENED - 0.5)
+			GetObjectPos(FloorDoorsObj[i][0], x, y, z);
+			if(x < 1788.2276 - 0.5)
 			{
 				ElevatorMoveToFloor(ElevatorQueue[0]);
 				RemoveFirstQueueFloor();
@@ -8273,8 +8282,8 @@ public OnObjectMoved(objectid)
 
 public OnPlayerPickUpPickup(playerid, pickupid)
 {
-	if(pickupid == TPls || pickupid == TPsf || pickupid == TPlv) return ShowPlayerDialog(playerid, DIALOG_TP, DIALOG_STYLE_LIST, "{FFFF00}Меню телепортов", "Los Santos\nSan Fierro\nLas Venturas\nДругое", "Ок", "Отмена");
-	if(pickupid == TPChina)
+	if(pickupid == TpLSPick || pickupid == TpSFPick || pickupid == TpLVPick) return ShowPlayerDialog(playerid, DIALOG_TP, DIALOG_STYLE_LIST, "{FFFF00}Меню телепортов", "Los Santos\nSan Fierro\nLas Venturas\nДругое", "Ок", "Отмена");
+	if(pickupid == TpChinaPick)
 	{
 		SetPlayerPos(playerid, 1051.3702, -1290.4711, 13.8372);
 		SetPlayerFacingAngle(playerid, 267.0);
@@ -8284,14 +8293,14 @@ public OnPlayerPickUpPickup(playerid, pickupid)
 	}
 	for(new i = GetPlayerPoolSize(), Float:X, Float:Y, Float:Z; i >= 0; --i)
 	{
-		if(IsPlayerConnected(i) && PlayerInfo[i][pMineStatus] > 0 && PlayerInfo[i][pMinePickup] == pickupid)
+		if(IsPlayerConnected(i) && PlayerInfo[i][pMineStatus] > 0 && PlayerInfo[i][pMinePick] == pickupid)
 		{
-			GetObjectPos(PlayerInfo[i][pMine][0], X, Y, Z);
+			GetObjectPos(PlayerInfo[i][pMineObj][0], X, Y, Z);
 			CreateExplosion(X, Y, Z, 7, 1.0);
-			DestroyPickup(PlayerInfo[i][pMinePickup]);
-			DestroyObject(PlayerInfo[i][pMine][0]);
-			DestroyObject(PlayerInfo[i][pMine][1]);
-			PlayerInfo[i][pMinePickup] = -1;
+			DestroyPickup(PlayerInfo[i][pMinePick]);
+			DestroyObject(PlayerInfo[i][pMineObj][0]);
+			DestroyObject(PlayerInfo[i][pMineObj][1]);
+			PlayerInfo[i][pMinePick] = -1;
 			PlayerInfo[i][pMineStatus] = 0;
 			break;
 		}
@@ -8428,9 +8437,9 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			BuildTakeVehPos = false;
 			ShowPlayerDialog(playerid, DIALOG_RACE_CREATE_4, DIALOG_STYLE_MSGBOX, "{FFFF00}Создание новой гонки (Этап 4/4)", RaceCreate4Str, "Ок", "Назад");
 		}
-		if(BuildTakeCheckpoints)
+		if(BuildTakeCPs)
 		{
-			if(BuildCheckPointCount > MAX_RACE_CHECKPOINTS_EACH_RACE) return SendClientMessage(playerid, COLOR_RED_RACE, "RACE: Вы достигли максимального количества чекпоинтов!");
+			if(BuildCPCount > MAX_RACE_CP_EACH_RACE) return SendClientMessage(playerid, COLOR_RED_RACE, "RACE: Вы достигли максимального количества чекпоинтов!");
 			if(!IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COLOR_RED_RACE, "RACE: Вы должны быть в автомобиле");
 			new Float:vPosX, Float:vPosY, Float:vPosZ;
 			GetVehiclePos(GetPlayerVehicleID(playerid), vPosX, vPosY, vPosZ);
@@ -8439,20 +8448,20 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			if(iniFile < 0) iniFile = ini_openFile(string);
 			if(iniFile >= INI_OK)
 			{
-				format(string, sizeof string, "CP_%d_PosX", BuildCheckPointCount);
+				format(string, sizeof string, "CP_%d_PosX", BuildCPCount);
 				ini_setFloat(iniFile, string, vPosX);
-				format(string, sizeof string, "CP_%d_PosY", BuildCheckPointCount);
+				format(string, sizeof string, "CP_%d_PosY", BuildCPCount);
 				ini_setFloat(iniFile, string, vPosY);
-				format(string, sizeof string, "CP_%d_PosZ", BuildCheckPointCount);
+				format(string, sizeof string, "CP_%d_PosZ", BuildCPCount);
 				ini_setFloat(iniFile, string, vPosZ);
 				ini_closeFile(iniFile);
-				format(string, sizeof string, "RACE: Чекпоинт '%d' был создан!", BuildCheckPointCount + 1);
+				format(string, sizeof string, "RACE: Чекпоинт '%d' был создан!", BuildCPCount + 1);
 				SendClientMessage(playerid, COLOR_YELLOW, string);
-				BuildCheckPointCount++;
+				BuildCPCount++;
 			}
 		}
 	}
-	if(newkeys & KEY_SECONDARY_ATTACK && BuildTakeCheckpoints)
+	if(newkeys & KEY_SECONDARY_ATTACK && BuildTakeCPs)
 	{
 		ShowPlayerDialog(playerid, DIALOG_RACE_CREATE_DONE, DIALOG_STYLE_MSGBOX, "{FFFF00}Создание новой гонки (готово)", "Вы создали гонку и уже сейчас она готова к использованию.\n\n>> Нажмите 'Готово' для завершения. 'Выход' - для отмены.", "Готово", "Выход");
 		new iniFile = ini_openFile("/rRaceSystem/RaceNames/RaceNames.txt");
@@ -8469,7 +8478,7 @@ public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 		iniFile = ini_openFile(string);
 		if(iniFile >= INI_OK)
 		{
-			ini_setInteger(iniFile, "TotalCP", BuildCheckPointCount);
+			ini_setInteger(iniFile, "TotalCP", BuildCPCount);
 			for(new i; i < 5; i++)
 			{
 				format(string, sizeof string, "BestRacerTime_%d", i);
@@ -8495,16 +8504,16 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 			SendClientMessageToAll(COLOR_RED_RACE, string);
 			SendClientMessage(playerid, COLOR_RED_RACE, "RACE: Вы дисквалифицированы за смену транспорта!");
 			StopPlayerRace(playerid);
-			JoinCount--;
+			RaceJoinCount--;
 		}
-		else if(PlayerInfo[playerid][pCPProgess] == TotalCP - 1)
+		else if(PlayerInfo[playerid][pRaceCPProgess] == TotalRaceCP - 1)
 		{
 			new TimeStamp = GetTickCount(), TotalRaceTime;
 			TotalRaceTime = TimeStamp - RaceTick;
 			new rTime0, rTime1, rTime2;
 			ConvertTime(var, TotalRaceTime, rTime0, rTime1, rTime2);
 			new Prize0, Prize1;
-			switch(TimeProgress + 1)
+			switch(RaceTimeProgress + 1)
 			{
 				case 1:
 				{
@@ -8524,18 +8533,18 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 				case 4: Prize0 = random(random(3500)) + 7000;
 				case 5: Prize0 = random(random(3000)) + 6000;
 			}
-			format(string, sizeof string, "{FF0000}RACE: {FFFF00}\"%s\" {00FF7F}завершил гонку. Место: {FFFF00}\"%d\"", PlayerInfo[playerid][pName], TimeProgress + 1);
+			format(string, sizeof string, "{FF0000}RACE: {FFFF00}\"%s\" {00FF7F}завершил гонку. Место: {FFFF00}\"%d\"", PlayerInfo[playerid][pName], RaceTimeProgress + 1);
 			SendClientMessageToAll(-1, string);
 			format(string, sizeof string, "{FF0000}RACE: {00FF7F}Время: {FFFF00}\"%02d:%02d.%d\"{00FF7F}. Награда - {FFFF00}\"$%d\"{00FF7F}. Очки - {FFFF00}\"%d\"", rTime0, rTime1, rTime2, Prize0, Prize1);
 			SendClientMessageToAll(-1, string);
-			if(FinishCount <= 5)
+			if(RaceFinishCount <= 5)
 			{
 				format(string, sizeof string, "/rRaceSystem/%s.RRACE", RaceName);
 				new iniFile = ini_openFile(string);
 				if(iniFile >= INI_OK)
 				{
 					new TempTotalTime;
-					format(string, sizeof string, "BestRacerTime_%d", TimeProgress);
+					format(string, sizeof string, "BestRacerTime_%d", RaceTimeProgress);
 					ini_getInteger(iniFile, string, TempTotalTime);
 					new TempTime0, TempTime1, TempTime2, time2 = TempTotalTime - TotalRaceTime;
 					ConvertTime(var1, time2, TempTime0, TempTime1, TempTime2);
@@ -8544,33 +8553,33 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 						ini_setInteger(iniFile, string, TotalRaceTime);
 						if(TempTotalTime > 0)
 						{
-							static racer[MAX_PLAYER_NAME];
-							format(string, sizeof string, "BestRacer_%d", TimeProgress);
+							static racer[MAX_PLAYER_NAME + 1];
+							format(string, sizeof string, "BestRacer_%d", RaceTimeProgress);
 							ini_getString(iniFile, string, racer);
-							format(string, sizeof string, "RACE: \"%s\" установил новый рекорд и был на \"%02d:%02d.%d\" секунд быстрее предыдущего победителя \"%s\"! Поздравляем: \"%d\" место!", PlayerInfo[playerid][pName], TempTime0, TempTime1, TempTime2, racer, TimeProgress + 1);
+							format(string, sizeof string, "RACE: \"%s\" установил новый рекорд и был на \"%02d:%02d.%d\" секунд быстрее предыдущего победителя \"%s\"! Поздравляем: \"%d\" место!", PlayerInfo[playerid][pName], TempTime0, TempTime1, TempTime2, racer, RaceTimeProgress + 1);
 						}
-						else format(string, sizeof string, "RACE: \"%s\" установил новый рекорд! Поздравляем: \"%d\" место!", PlayerInfo[playerid][pName], TimeProgress + 1);
+						else format(string, sizeof string, "RACE: \"%s\" установил новый рекорд! Поздравляем: \"%d\" место!", PlayerInfo[playerid][pName], RaceTimeProgress + 1);
 						SendClientMessageToAll(COLOR_LIME, string);
-						format(string, sizeof string, "BestRacer_%d", TimeProgress);
+						format(string, sizeof string, "BestRacer_%d", RaceTimeProgress);
 						ini_setString(iniFile, string, PlayerInfo[playerid][pName]);
-						TimeProgress++;
+						RaceTimeProgress++;
 					}
 					ini_closeFile(iniFile);
 				}
 			}
-			FinishCount++;
+			RaceFinishCount++;
 			PlayerInfo[playerid][pMoney] += Prize0;
 			PlayerInfo[playerid][pPoints] += Prize1;
 			DisablePlayerRaceCheckpoint(playerid);
-			PlayerInfo[playerid][pCPProgess]++;
-			if(FinishCount >= JoinCount) return StopRace();
+			PlayerInfo[playerid][pRaceCPProgess]++;
+			if(RaceFinishCount >= RaceJoinCount) return StopRace();
 		}
 		else
 		{
-			PlayerInfo[playerid][pCPProgess]++;
-			CPCoords[PlayerInfo[playerid][pCPProgess]][3]++;
-			PlayerInfo[playerid][pRacePos] = floatround(CPCoords[PlayerInfo[playerid][pCPProgess]][3], floatround_floor);
-			SetCP(playerid, PlayerInfo[playerid][pCPProgess], PlayerInfo[playerid][pCPProgess] + 1, TotalCP, RaceType);
+			PlayerInfo[playerid][pRaceCPProgess]++;
+			RaceCPCoords[PlayerInfo[playerid][pRaceCPProgess]][3]++;
+			PlayerInfo[playerid][pRacePos] = floatround(RaceCPCoords[PlayerInfo[playerid][pRaceCPProgess]][3], floatround_floor);
+			SetCP(playerid, PlayerInfo[playerid][pRaceCPProgess], PlayerInfo[playerid][pRaceCPProgess] + 1, TotalRaceCP, RaceType);
 			PlayerPlaySound(playerid, 1137, 0.0, 0.0, 0.0);
 		}
 	}
@@ -8584,7 +8593,7 @@ public OnPlayerClickPlayer(playerid, clickedplayerid, source)
 	SendClientMessage(playerid, -1, message);
 	format(message, sizeof message, "{FFFF00}%s(ID: %d)", PlayerInfo[clickedplayerid][pName], clickedplayerid);
 	if(playerid != clickedplayerid) ShowPlayerDialog(playerid, DIALOG_PLAYER_MENU, DIALOG_STYLE_LIST, message, "Написать PM\nПередать деньги\nПригласить на PVP\nНаписать жалобу\nПригласить в банду\nПосмотреть статистику\nПередать DM-очки", "Выбрать", "Отмена");
-	PlayerInfo[playerid][pClicked] = clickedplayerid;
+	PlayerInfo[playerid][pClickedId] = clickedplayerid;
 	return 1;
 }
 
@@ -8596,7 +8605,7 @@ fpublic RotateFerrisWheel()
 	else FerrisWheelAlternate = true;
 	new Float:FerrisWheelModZPos;
 	if(FerrisWheelAlternate) FerrisWheelModZPos = 0.05;
-	MoveObject(FerrisWheelObjects[10], 389.7734, -2028.4688, 22.0 + FerrisWheelModZPos, FERRIS_WHEEL_SPEED, 0.0, FerrisWheelAngle, 90.0);
+	MoveObject(FerrisWheelObj[10], 389.7734, -2028.4688, 22.0 + FerrisWheelModZPos, FERRIS_WHEEL_SPEED, 0.0, FerrisWheelAngle, 90.0);
 	return 1;
 }
 
@@ -8652,7 +8661,7 @@ fpublic MineCount(playerid)
 {
 	PlayerInfo[playerid][pMineTmr] = SetTimerEx("MineCount", 1000, 0, "i", playerid);
 	new Float:X, Float:Y, Float:Z;
-	GetObjectPos(PlayerInfo[playerid][pMine][0], X, Y, Z);
+	GetObjectPos(PlayerInfo[playerid][pMineObj][0], X, Y, Z);
 	switch(PlayerInfo[playerid][pMineCount])
 	{
 		case 11: PlayerInfo[playerid][pMineLabel] = Create3DTextLabel("До активации осталось: \n10 cекунд!", COLOR_MINE_10, X, Y, Z + 1, 40.0, 0);
@@ -8668,9 +8677,9 @@ fpublic MineCount(playerid)
 		case 1:
 		{
 			KillTimer(PlayerInfo[playerid][pMineTmr]);
-			DestroyObject(PlayerInfo[playerid][pMine][1]);
+			DestroyObject(PlayerInfo[playerid][pMineObj][1]);
 			Delete3DTextLabel(PlayerInfo[playerid][pMineLabel]);
-			PlayerInfo[playerid][pMinePickup] = CreatePickup(0, 1, X, Y, Z, -1);
+			PlayerInfo[playerid][pMinePick] = CreatePickup(0, 1, X, Y, Z, -1);
 			PlayerInfo[playerid][pMineLabel] = Text3D:-1;
 			PlayerInfo[playerid][pMineStatus] = 2;
 		}
@@ -8681,81 +8690,76 @@ fpublic MineCount(playerid)
 
 fpublic SetupRaceForPlayer(playerid)
 {
-	PlayerInfo[playerid][pCPProgess] = 0;
+	RaceCPCoords[playerid][3] = 0;
 	TogglePlayerControllable(playerid, 0);
-	CPCoords[playerid][3] = 0;
-	SetCP(playerid, PlayerInfo[playerid][pCPProgess], PlayerInfo[playerid][pCPProgess] + 1, TotalCP, RaceType);
-	if(IsOdd(playerid)) Index = 1;
-	else Index = 0;
-	switch(Index)
+	PlayerInfo[playerid][pRaceCPProgess] = 0;
+	SetCP(playerid, PlayerInfo[playerid][pRaceCPProgess], PlayerInfo[playerid][pRaceCPProgess] + 1, TotalRaceCP, RaceType);
+	if(IsOdd(playerid))
 	{
-		case 0:
+		if(RacePlayersCount[1] == 1)
 		{
-			if(PlayersCount[0] == 1)
-			{
-				RaceVehCoords[0][0] -= (6 * floatsin(-RaceVehCoords[0][3], degrees));
-				RaceVehCoords[0][1] -= (6 * floatcos(-RaceVehCoords[0][3], degrees));
-				PlayerInfo[playerid][pCreatedRaceVeh] = CreateVehicle(RaceVehicle, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2] + 2, RaceVehCoords[0][3], random(126), random(126), (60 * 60));
-				SetPlayerPos(playerid, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2] + 2.0);
-				SetPlayerFacingAngle(playerid, RaceVehCoords[0][3]);
-				SetPlayerInterior(playerid, 0);
-				SetPlayerVirtualWorld(playerid, 0);
-				PutPlayerInVehicle(playerid, PlayerInfo[playerid][pCreatedRaceVeh], 0);
-				Camera(playerid, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2], RaceVehCoords[0][3], 20.0);
-			}
-			else
-			{
-				PlayerInfo[playerid][pCreatedRaceVeh] = CreateVehicle(RaceVehicle, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2] + 2, RaceVehCoords[0][3], random(126), random(126), (60 * 60));
-				SetPlayerPos(playerid, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2] + 2.0);
-				SetPlayerFacingAngle(playerid, RaceVehCoords[0][3]);
-				SetPlayerInterior(playerid, 0);
-				SetPlayerVirtualWorld(playerid, 0);
-				PutPlayerInVehicle(playerid, PlayerInfo[playerid][pCreatedRaceVeh], 0);
-				Camera(playerid, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2], RaceVehCoords[0][3], 20.0);
-				PlayersCount[0] = 1;
-			}
+			RaceVehCoords[1][0] -= (6 * floatsin(-RaceVehCoords[1][3], degrees));
+			RaceVehCoords[1][1] -= (6 * floatcos(-RaceVehCoords[1][3], degrees));
+			PlayerInfo[playerid][pCreatedRaceVeh] = CreateVehicle(RaceVehicle, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2] + 2, RaceVehCoords[1][3], random(126), random(126), (60 * 60));
+			SetPlayerPos(playerid, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2] + 2.0);
+			SetPlayerFacingAngle(playerid, RaceVehCoords[1][3]);
+			SetPlayerInterior(playerid, 0);
+			SetPlayerVirtualWorld(playerid, 0);
+			PutPlayerInVehicle(playerid, PlayerInfo[playerid][pCreatedRaceVeh], 0);
+			SetCamera(playerid, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2], RaceVehCoords[1][3], 20.0);
 		}
-		case 1:
+		else
 		{
-			if(PlayersCount[1] == 1)
-			{
-				RaceVehCoords[1][0] -= (6 * floatsin(-RaceVehCoords[1][3], degrees));
-				RaceVehCoords[1][1] -= (6 * floatcos(-RaceVehCoords[1][3], degrees));
-				PlayerInfo[playerid][pCreatedRaceVeh] = CreateVehicle(RaceVehicle, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2] + 2, RaceVehCoords[1][3], random(126), random(126), (60 * 60));
-				SetPlayerPos(playerid, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2] + 2.0);
-				SetPlayerFacingAngle(playerid, RaceVehCoords[1][3]);
-				SetPlayerInterior(playerid, 0);
-				SetPlayerVirtualWorld(playerid, 0);
-				PutPlayerInVehicle(playerid, PlayerInfo[playerid][pCreatedRaceVeh], 0);
-				Camera(playerid, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2], RaceVehCoords[1][3], 20.0);
-			}
-			else
-			{
-				PlayerInfo[playerid][pCreatedRaceVeh] = CreateVehicle(RaceVehicle, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2] + 2, RaceVehCoords[1][3], random(126), random(126), (60 * 60));
-				SetPlayerPos(playerid, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2] + 2.0);
-				SetPlayerFacingAngle(playerid, RaceVehCoords[1][3]);
-				SetPlayerInterior(playerid, 0);
-				SetPlayerVirtualWorld(playerid, 0);
-				PutPlayerInVehicle(playerid, PlayerInfo[playerid][pCreatedRaceVeh], 0);
-				Camera(playerid, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2], RaceVehCoords[1][3], 20.0);
-				PlayersCount[1] = 1;
-			}
+			PlayerInfo[playerid][pCreatedRaceVeh] = CreateVehicle(RaceVehicle, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2] + 2, RaceVehCoords[1][3], random(126), random(126), (60 * 60));
+			SetPlayerPos(playerid, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2] + 2.0);
+			SetPlayerFacingAngle(playerid, RaceVehCoords[1][3]);
+			SetPlayerInterior(playerid, 0);
+			SetPlayerVirtualWorld(playerid, 0);
+			PutPlayerInVehicle(playerid, PlayerInfo[playerid][pCreatedRaceVeh], 0);
+			SetCamera(playerid, RaceVehCoords[1][0], RaceVehCoords[1][1], RaceVehCoords[1][2], RaceVehCoords[1][3], 20.0);
+			RacePlayersCount[1] = 1;
+		}
+	}
+	else
+	{
+		if(RacePlayersCount[0] == 1)
+		{
+			RaceVehCoords[0][0] -= (6 * floatsin(-RaceVehCoords[0][3], degrees));
+			RaceVehCoords[0][1] -= (6 * floatcos(-RaceVehCoords[0][3], degrees));
+			PlayerInfo[playerid][pCreatedRaceVeh] = CreateVehicle(RaceVehicle, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2] + 2, RaceVehCoords[0][3], random(126), random(126), (60 * 60));
+			SetPlayerPos(playerid, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2] + 2.0);
+			SetPlayerFacingAngle(playerid, RaceVehCoords[0][3]);
+			SetPlayerInterior(playerid, 0);
+			SetPlayerVirtualWorld(playerid, 0);
+			PutPlayerInVehicle(playerid, PlayerInfo[playerid][pCreatedRaceVeh], 0);
+			SetCamera(playerid, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2], RaceVehCoords[0][3], 20.0);
+		}
+		else
+		{
+			PlayerInfo[playerid][pCreatedRaceVeh] = CreateVehicle(RaceVehicle, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2] + 2, RaceVehCoords[0][3], random(126), random(126), (60 * 60));
+			SetPlayerPos(playerid, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2] + 2.0);
+			SetPlayerFacingAngle(playerid, RaceVehCoords[0][3]);
+			SetPlayerInterior(playerid, 0);
+			SetPlayerVirtualWorld(playerid, 0);
+			PutPlayerInVehicle(playerid, PlayerInfo[playerid][pCreatedRaceVeh], 0);
+			SetCamera(playerid, RaceVehCoords[0][0], RaceVehCoords[0][1], RaceVehCoords[0][2], RaceVehCoords[0][3], 20.0);
+			RacePlayersCount[0] = 1;
 		}
 	}
 	PlayerInfo[playerid][pInfoTmr] = SetTimerEx("TextInfo", 500, 1, "i", playerid);
 	static string[145], tmp[16];
 	TimeConvert(RaceTime, tmp, sizeof tmp);
-	format(string, sizeof string, "RaceName: ~w~%s~n~~p~~h~Checkpoint: ~w~%d/%d~n~~b~~h~RaceTime: ~w~%s~n~~y~RacePosition: ~w~%d/%d~n~ ", RaceName, PlayerInfo[playerid][pCPProgess], TotalCP, tmp, PlayerInfo[playerid][pRacePos], JoinCount);
+	format(string, sizeof string, "RaceName: ~w~%s~n~~p~~h~Checkpoint: ~w~%d/%d~n~~b~~h~RaceTime: ~w~%s~n~~y~RacePosition: ~w~%d/%d~n~ ", RaceName, PlayerInfo[playerid][pRaceCPProgess], TotalRaceCP, tmp, PlayerInfo[playerid][pRacePos], RaceJoinCount);
 	PlayerTextDrawSetString(playerid, PlayerInfo[playerid][pRaceInfo], string);
 	PlayerTextDrawShow(playerid, PlayerInfo[playerid][pRaceInfo]);
-	JoinCount++;
+	RaceJoinCount++;
 	return 1;
 }
 
 fpublic CountTillRace()
 {
 	static string[145];
-	switch(CountAmount)
+	switch(RaceCountAmount)
 	{
 		case 0:
 		{
@@ -8767,7 +8771,7 @@ fpublic CountTillRace()
 		}
 		case 1..5:
 		{
-			format(string, sizeof string, "~b~%d", CountAmount);
+			format(string, sizeof string, "~b~%d", RaceCountAmount);
 			for(new i = GetPlayerPoolSize(); i >= 0; --i)
 			{
 				if(IsPlayerConnected(i) && PlayerInfo[i][pInRace])
@@ -8779,11 +8783,11 @@ fpublic CountTillRace()
 		}
 		case 60, 50, 40, 30, 20, 10:
 		{
-			format(string, sizeof string, "RACE: \"%d\" секунд осталось до старта гонки \"%s\"! Введите \"/joinrace\", чтобы вступить в гонку или \"/exitrace\", чтобы выйти.", CountAmount, RaceName);
+			format(string, sizeof string, "RACE: \"%d\" секунд осталось до старта гонки \"%s\"! Введите \"/joinrace\", чтобы вступить в гонку или \"/exitrace\", чтобы выйти.", RaceCountAmount, RaceName);
 			SendClientMessageToAll(COLOR_GREEN_RACE, string);
 		}
 	}
-	return CountAmount--;
+	return RaceCountAmount--;
 }
 
 fpublic PayDay(playerid)
@@ -8877,7 +8881,7 @@ fpublic Speedometer()
 	{
 		if(IsPlayerConnected(i))
 		{
-			format(string, sizeof string, "%d Km/h", GetPlayerSpeed(i, true));
+			format(string, sizeof string, "%d Km/h", GetPlayerSpeed(i));
 			PlayerTextDrawSetString(i, PlayerInfo[i][pVehSpeed], string);
 		}
 	}
@@ -8926,7 +8930,7 @@ fpublic UpdateTimer()
 				SendClientMessageToAll(COLOR_BORDO, string);
 				Ban2(i);
 			}
-			if(1538 <= GetPlayerAnimationIndex(i) <= 1544 && GetPlayerSpeed(i, true) > 50)
+			if(1538 <= GetPlayerAnimationIndex(i) <= 1544 && GetPlayerSpeed(i) > 50)
 			{
 				printf("Игрок %s кикнут за FlyHack", PlayerInfo[i][pName]);
 				format(string, sizeof string, "Игрок %s(ID: %d) кикнут за FlyHack!", PlayerInfo[i][pName], i);
@@ -8999,7 +9003,7 @@ fpublic TextInfo(playerid)
 {
 	static string[145], tmp[16];
 	TimeConvert(RaceTime, tmp, sizeof tmp);
-	format(string, sizeof string, "RaceName: ~w~%s~n~~p~~h~Checkpoint: ~w~%d/%d~n~~b~~h~RaceTime: ~w~%s~n~~y~RacePosition: ~w~%d/%d~n~", RaceName, PlayerInfo[playerid][pCPProgess], TotalCP, tmp, PlayerInfo[playerid][pRacePos], JoinCount);
+	format(string, sizeof string, "RaceName: ~w~%s~n~~p~~h~Checkpoint: ~w~%d/%d~n~~b~~h~RaceTime: ~w~%s~n~~y~RacePosition: ~w~%d/%d~n~", RaceName, PlayerInfo[playerid][pRaceCPProgess], TotalRaceCP, tmp, PlayerInfo[playerid][pRacePos], RaceJoinCount);
 	PlayerTextDrawSetString(playerid, PlayerInfo[playerid][pRaceInfo], string);
 	PlayerTextDrawShow(playerid, PlayerInfo[playerid][pRaceInfo]);
 	return 1;
@@ -9010,7 +9014,7 @@ fpublic RaceCounter()
 	if(RaceStarted)
 	{
 		RaceTime--;
-		if(JoinCount < 2)
+		if(RaceJoinCount < 2)
 		{
 			if(!RaceChecked) SendClientMessageToAll(COLOR_RED_RACE, "RACE: Гонка закончена... Не набралось достаточное количество участников.");
 			else SendClientMessageToAll(COLOR_RED_RACE, "RACE: Гонка закончена... Все участники покинули гонку.");
@@ -9050,12 +9054,12 @@ fpublic CountFunc()
 
 fpublic ElevatorBoost(floorid)
 {
-	StopObject(ObjElevator);
-	StopObject(ObjElevatorDoors[0]);
-	StopObject(ObjElevatorDoors[1]);
-	MoveObject(ObjElevator, 1786.6781, -1303.4594, GetElevatorZCoordForFloor(floorid), ELEVATOR_SPEED);
-	MoveObject(ObjElevatorDoors[0], X_DOOR_CLOSED, -1303.4594, GetDoorsZCoordForFloor(floorid), ELEVATOR_SPEED);
-	MoveObject(ObjElevatorDoors[1], X_DOOR_CLOSED, -1303.4594, GetDoorsZCoordForFloor(floorid), ELEVATOR_SPEED);
+	StopObject(ElevatorObj);
+	StopObject(ElevatorDoorsObj[0]);
+	StopObject(ElevatorDoorsObj[1]);
+	MoveObject(ElevatorObj, 1786.6781, -1303.4594, GetElevatorZCoordForFloor(floorid), ELEVATOR_SPEED);
+	MoveObject(ElevatorDoorsObj[0], 1786.6276, -1303.4594, GetDoorsZCoordForFloor(floorid), ELEVATOR_SPEED);
+	MoveObject(ElevatorDoorsObj[1], 1786.6276, -1303.4594, GetDoorsZCoordForFloor(floorid), ELEVATOR_SPEED);
 	return 1;
 }
 
@@ -9087,18 +9091,18 @@ BanEx2(playerid, reason[])
 ElevatorInitialize()
 {
 	static string[145];
-	ObjElevator = CreateObject(18755, 1786.6781, -1303.4594, GROUND_Z_COORD + ELEVATOR_OFFSET, 0.0, 0.0, 270.0);
-	ObjElevatorDoors[0] = CreateObject(18757, X_DOOR_CLOSED, -1303.4594, GROUND_Z_COORD, 0.0, 0.0, 270.0);
-	ObjElevatorDoors[1] = CreateObject(18756, X_DOOR_CLOSED, -1303.4594, GROUND_Z_COORD, 0.0, 0.0, 270.0);
-	LabelElevator = Create3DTextLabel("Нажмите '~k~~CONVERSATION_YES~' для использования лифта", COLOR_ELEVATOR, 1784.9822, -1302.0426, 13.6491, 4.0, 0, 1);
-	for(new i, Float:z; i < sizeof ObjFloorDoors; i++)
+	ElevatorObj = CreateObject(18755, 1786.6781, -1303.4594, 14.5114 + 0.0595, 0.0, 0.0, 270.0);
+	ElevatorDoorsObj[0] = CreateObject(18757, 1786.6276, -1303.4594, 14.5114, 0.0, 0.0, 270.0);
+	ElevatorDoorsObj[1] = CreateObject(18756, 1786.6276, -1303.4594, 14.5114, 0.0, 0.0, 270.0);
+	ElevatorLabel = Create3DTextLabel("Нажмите '~k~~CONVERSATION_YES~' для использования лифта", COLOR_ELEVATOR, 1784.9822, -1302.0426, 13.6491, 4.0, 0, 1);
+	for(new i, Float:z; i < sizeof FloorDoorsObj; i++)
 	{
-		ObjFloorDoors[i][0] = CreateObject(18757, X_DOOR_CLOSED, -1303.1711, GetDoorsZCoordForFloor(i), 0.0, 0.0, 270.0);
-		ObjFloorDoors[i][1] = CreateObject(18756, X_DOOR_CLOSED, -1303.1711, GetDoorsZCoordForFloor(i), 0.0, 0.0, 270.0);
+		FloorDoorsObj[i][0] = CreateObject(18757, 1786.6276, -1303.1711, GetDoorsZCoordForFloor(i), 0.0, 0.0, 270.0);
+		FloorDoorsObj[i][1] = CreateObject(18756, 1786.6276, -1303.1711, GetDoorsZCoordForFloor(i), 0.0, 0.0, 270.0);
 		format(string, sizeof string, "%s\nНажмите '~k~~CONVERSATION_YES~' для вызова лифта", FloorNames[i]);
 		if(i == 0) z = 13.4713;
 		else z = 13.4713 + 8.7396 + ((i - 1) * 5.4515);
-		LabelFloors[i] = Create3DTextLabel(string, COLOR_ELEVATOR, 1783.9799, -1300.766, z, 10.5, 0, 1);
+		FloorsLabel[i] = Create3DTextLabel(string, COLOR_ELEVATOR, 1783.9799, -1300.766, z, 10.5, 0, 1);
 	}
 	FloorOpenDoors(0);
 	ElevatorOpenDoors();
@@ -9107,15 +9111,15 @@ ElevatorInitialize()
 
 ElevatorDestroy()
 {
-	DestroyObject(ObjElevator);
-	DestroyObject(ObjElevatorDoors[0]);
-	DestroyObject(ObjElevatorDoors[1]);
-	Delete3DTextLabel(LabelElevator);
-	for(new i = sizeof(ObjFloorDoors) - 1; i >= 0; --i)
+	DestroyObject(ElevatorObj);
+	DestroyObject(ElevatorDoorsObj[0]);
+	DestroyObject(ElevatorDoorsObj[1]);
+	Delete3DTextLabel(ElevatorLabel);
+	for(new i = sizeof(FloorDoorsObj) - 1; i >= 0; --i)
 	{
-		DestroyObject(ObjFloorDoors[i][0]);
-		DestroyObject(ObjFloorDoors[i][1]);
-		Delete3DTextLabel(LabelFloors[i]);
+		DestroyObject(FloorDoorsObj[i][0]);
+		DestroyObject(FloorDoorsObj[i][1]);
+		Delete3DTextLabel(FloorsLabel[i]);
 	}
 	return 1;
 }
@@ -9123,9 +9127,9 @@ ElevatorDestroy()
 ElevatorOpenDoors()
 {
 	new Float:x, Float:y, Float:z;
-	GetObjectPos(ObjElevatorDoors[0], x, y, z);
-	MoveObject(ObjElevatorDoors[0], X_DOOR_L_OPENED, y, z, DOORS_SPEED);
-	MoveObject(ObjElevatorDoors[1], X_DOOR_R_OPENED, y, z, DOORS_SPEED);
+	GetObjectPos(ElevatorDoorsObj[0], x, y, z);
+	MoveObject(ElevatorDoorsObj[0], 1788.2276, y, z, DOORS_SPEED);
+	MoveObject(ElevatorDoorsObj[1], 1785.0276, y, z, DOORS_SPEED);
 	return 1;
 }
 
@@ -9133,25 +9137,25 @@ ElevatorCloseDoors()
 {
 	if(ElevatorState == 2) return 0;
 	new Float:x, Float:y, Float:z;
-	GetObjectPos(ObjElevatorDoors[0], x, y, z);
-	MoveObject(ObjElevatorDoors[0], X_DOOR_CLOSED, y, z, DOORS_SPEED);
-	MoveObject(ObjElevatorDoors[1], X_DOOR_CLOSED, y, z, DOORS_SPEED);
+	GetObjectPos(ElevatorDoorsObj[0], x, y, z);
+	MoveObject(ElevatorDoorsObj[0], 1786.6276, y, z, DOORS_SPEED);
+	MoveObject(ElevatorDoorsObj[1], 1786.6276, y, z, DOORS_SPEED);
 	return 1;
 }
 
 FloorOpenDoors(floorid)
 {
-	MoveObject(ObjFloorDoors[floorid][0], X_DOOR_L_OPENED, -1303.1711, GetDoorsZCoordForFloor(floorid), DOORS_SPEED);
-	MoveObject(ObjFloorDoors[floorid][1], X_DOOR_R_OPENED, -1303.1711, GetDoorsZCoordForFloor(floorid), DOORS_SPEED);
-	PlaySoundForPlayersInRange(6401, 50.0, X_DOOR_CLOSED, -1303.1711, GetDoorsZCoordForFloor(floorid) + 5.0);
+	MoveObject(FloorDoorsObj[floorid][0], 1788.2276, -1303.1711, GetDoorsZCoordForFloor(floorid), DOORS_SPEED);
+	MoveObject(FloorDoorsObj[floorid][1], 1785.0276, -1303.1711, GetDoorsZCoordForFloor(floorid), DOORS_SPEED);
+	PlaySoundForPlayersInRange(6401, 50.0, 1786.6276, -1303.1711, GetDoorsZCoordForFloor(floorid) + 5.0);
 	return 1;
 }
 
 FloorCloseDoors(floorid)
 {
-	MoveObject(ObjFloorDoors[floorid][0], X_DOOR_CLOSED, -1303.1711, GetDoorsZCoordForFloor(floorid), DOORS_SPEED);
-	MoveObject(ObjFloorDoors[floorid][1], X_DOOR_CLOSED, -1303.1711, GetDoorsZCoordForFloor(floorid), DOORS_SPEED);
-	PlaySoundForPlayersInRange(6401, 50.0, X_DOOR_CLOSED, -1303.1711, GetDoorsZCoordForFloor(floorid) + 5.0);
+	MoveObject(FloorDoorsObj[floorid][0], 1786.6276, -1303.1711, GetDoorsZCoordForFloor(floorid), DOORS_SPEED);
+	MoveObject(FloorDoorsObj[floorid][1], 1786.6276, -1303.1711, GetDoorsZCoordForFloor(floorid), DOORS_SPEED);
+	PlaySoundForPlayersInRange(6401, 50.0, 1786.6276, -1303.1711, GetDoorsZCoordForFloor(floorid) + 5.0);
 	return 1;
 }
 
@@ -9159,11 +9163,11 @@ ElevatorMoveToFloor(floorid)
 {
 	ElevatorState = 2;
 	ElevatorFloor = floorid;
-	MoveObject(ObjElevator, 1786.6781, -1303.4594, GetElevatorZCoordForFloor(floorid), 0.25);
-	MoveObject(ObjElevatorDoors[0], X_DOOR_CLOSED, -1303.4594, GetDoorsZCoordForFloor(floorid), 0.25);
-	MoveObject(ObjElevatorDoors[1], X_DOOR_CLOSED, -1303.4594, GetDoorsZCoordForFloor(floorid), 0.25);
+	MoveObject(ElevatorObj, 1786.6781, -1303.4594, GetElevatorZCoordForFloor(floorid), 0.25);
+	MoveObject(ElevatorDoorsObj[0], 1786.6276, -1303.4594, GetDoorsZCoordForFloor(floorid), 0.25);
+	MoveObject(ElevatorDoorsObj[1], 1786.6276, -1303.4594, GetDoorsZCoordForFloor(floorid), 0.25);
 	ElevatorBoostTmr = SetTimerEx("ElevatorBoost", 2000, 0, "i", floorid);
-	Delete3DTextLabel(LabelElevator);
+	Delete3DTextLabel(ElevatorLabel);
 	return 1;
 }
 
@@ -9298,7 +9302,7 @@ LoadRace(const racename[], playerid = INVALID_PLAYER_ID)
 	{
 		ini_getInteger(iniFile, "vModel", RaceVehicle);
 		ini_getInteger(iniFile, "rType", RaceType);
-		ini_getInteger(iniFile, "TotalCP", TotalCP);
+		ini_getInteger(iniFile, "TotalCP", TotalRaceCP);
 		for(i = 0; i < 2; i++)
 		{
 			format(string, sizeof string, "vPosX_%d", i);
@@ -9310,24 +9314,24 @@ LoadRace(const racename[], playerid = INVALID_PLAYER_ID)
 			format(string, sizeof string, "vAngle_%d", i);
 			ini_getFloat(iniFile, string, RaceVehCoords[i][3]);
 		}
-		for(i = 0; i < TotalCP; i++)
+		for(i = 0; i < TotalRaceCP; i++)
 		{
 			format(string, sizeof string, "CP_%d_PosX", i);
-			ini_getFloat(iniFile, string, CPCoords[i][0]);
+			ini_getFloat(iniFile, string, RaceCPCoords[i][0]);
 			format(string, sizeof string, "CP_%d_PosY", i);
-			ini_getFloat(iniFile, string, CPCoords[i][1]);
+			ini_getFloat(iniFile, string, RaceCPCoords[i][1]);
 			format(string, sizeof string, "CP_%d_PosZ", i);
-			ini_getFloat(iniFile, string, CPCoords[i][2]);
-			CPCoords[i][3] = 0;
+			ini_getFloat(iniFile, string, RaceCPCoords[i][2]);
+			RaceCPCoords[i][3] = 0;
 		}
 		ini_closeFile(iniFile);
 	}
-	JoinCount = 0;
-	FinishCount = 0;
-	TimeProgress = 0;
-	PlayersCount[0] = 0;
-	PlayersCount[1] = 0;
-	CountAmount = COUNT_DOWN_TILL_RACE_START;
+	RaceJoinCount = 0;
+	RaceFinishCount = 0;
+	RaceTimeProgress = 0;
+	RacePlayersCount[0] = 0;
+	RacePlayersCount[1] = 0;
+	RaceCountAmount = COUNTDOWN_TILL_RACE_START;
 	RaceTime = MAX_RACE_TIME;
 	RaceBusy = true;
 	if(playerid != INVALID_PLAYER_ID)
@@ -9432,9 +9436,9 @@ StopRace()
 	RaceStarted = false;
 	RaceBusy = false;
 	RaceTick = 0;
-	JoinCount = 0;
-	FinishCount = 0;
-	TimeProgress = 0;
+	RaceJoinCount = 0;
+	RaceFinishCount = 0;
+	RaceTimeProgress = 0;
 	for(new i = GetPlayerPoolSize(); i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][pInRace]) StopPlayerRace(i);
@@ -9450,9 +9454,9 @@ StopRace()
 
 StopPlayerRace(playerid)
 {
-	PlayerInfo[playerid][pCPProgess] = 0;
 	PlayerInfo[playerid][pInRace] = false;
 	DisablePlayerRaceCheckpoint(playerid);
+	PlayerInfo[playerid][pRaceCPProgess] = 0;
 	DestroyVehicle(PlayerInfo[playerid][pCreatedRaceVeh]);
 	PlayerTextDrawHide(playerid, PlayerInfo[playerid][pRaceInfo]);
 	KillTimer(PlayerInfo[playerid][pInfoTmr]);
@@ -9461,8 +9465,8 @@ StopPlayerRace(playerid)
 
 SetCP(playerid, PrevCP, NextCP, MaxCP, Type)
 {
-	if(NextCP == MaxCP) return SetPlayerRaceCheckpoint(playerid, Type + 1, CPCoords[PrevCP][0], CPCoords[PrevCP][1], CPCoords[PrevCP][2], CPCoords[NextCP][0], CPCoords[NextCP][1], CPCoords[NextCP][2], RACE_CHECKPOINT_SIZE);
-	SetPlayerRaceCheckpoint(playerid, Type, CPCoords[PrevCP][0], CPCoords[PrevCP][1], CPCoords[PrevCP][2], CPCoords[NextCP][0], CPCoords[NextCP][1], CPCoords[NextCP][2], RACE_CHECKPOINT_SIZE);
+	if(NextCP == MaxCP) return SetPlayerRaceCheckpoint(playerid, Type + 1, RaceCPCoords[PrevCP][0], RaceCPCoords[PrevCP][1], RaceCPCoords[PrevCP][2], RaceCPCoords[NextCP][0], RaceCPCoords[NextCP][1], RaceCPCoords[NextCP][2], RACE_CP_SIZE);
+	SetPlayerRaceCheckpoint(playerid, Type, RaceCPCoords[PrevCP][0], RaceCPCoords[PrevCP][1], RaceCPCoords[PrevCP][2], RaceCPCoords[NextCP][0], RaceCPCoords[NextCP][1], RaceCPCoords[NextCP][2], RACE_CP_SIZE);
 	return 1;
 }
 
@@ -9512,7 +9516,7 @@ Punish(playerid)
 	SetPlayerVirtualWorld(playerid, 0);
 	SetPlayerInterior(playerid, 15);
 	PlayerInfo[playerid][pPunish] = true;
-	PlayerInfo[playerid][pPunishTime] = JAIL_FOR_SPAWN_KILL * 60;
+	PlayerInfo[playerid][pPunishTime] = SPAWN_KILL_JAIL_TIME * 60;
 	return 1;
 }
 
@@ -9522,7 +9526,7 @@ UnJail(playerid)
 	SetPlayerPos(playerid, 1552.4484, -1674.9886, 16.1953);
 	SetPlayerSkin(playerid, TeamSkins[PlayerInfo[playerid][pClass]]);
 	if(PlayerInfo[playerid][pSkin] >= 0) SetPlayerSkin(playerid, PlayerInfo[playerid][pSkin]);
-	if(PlayerInfo[playerid][pGang] > 0 && GSkin[PlayerInfo[playerid][pGang]][PlayerInfo[playerid][pGangLvl] - 1] >= 0) SetPlayerSkin(playerid, GSkin[PlayerInfo[playerid][pGang]][PlayerInfo[playerid][pGangLvl] - 1]);
+	if(PlayerInfo[playerid][pGang] > 0 && GangSkin[PlayerInfo[playerid][pGang]][PlayerInfo[playerid][pGangLvl] - 1] >= 0) SetPlayerSkin(playerid, GangSkin[PlayerInfo[playerid][pGang]][PlayerInfo[playerid][pGangLvl] - 1]);
 	RemovePlayerAttachedObject(playerid, 8);
 	SetPlayerFacingAngle(playerid, 90.0);
 	SetPlayerVirtualWorld(playerid, 0);
@@ -9540,38 +9544,38 @@ GangLoad()
 {
 	for(new i = MAX_GANGS - 1, j, iniFile, string[64]; i >= 0; --i)
 	{
-		for(j = sizeof(GSkin[]) - 1; j >= 0; --j) GSkin[i][j] = -1;
+		for(j = sizeof(GangSkin[]) - 1; j >= 0; --j) GangSkin[i][j] = -1;
 		format(string, sizeof string, "Gangs/%d.ini", i);
 		iniFile = ini_openFile(string);
 		if(iniFile >= INI_OK)
 		{
-			ini_getString(iniFile, "Name", GName[i]);
-			ini_getString(iniFile, "Color", GColor[i]);
-			ini_getInteger(iniFile, "Check", GCheck[i]);
-			ini_getInteger(iniFile, "Money", GMoney[i]);
-			ini_getInteger(iniFile, "DMPoints", GDMPoints[i]);
-			ini_getInteger(iniFile, "SpawnInt", GSpawnInt[i]);
-			ini_getFloat(iniFile, "SpawnX", GSpawn[i][0]);
-			ini_getFloat(iniFile, "SpawnY", GSpawn[i][1]);
-			ini_getFloat(iniFile, "SpawnZ", GSpawn[i][2]);
-			ini_getInteger(iniFile, "Skin1", GSkin[i][0]);
-			ini_getInteger(iniFile, "Skin2", GSkin[i][1]);
-			ini_getInteger(iniFile, "Skin3", GSkin[i][2]);
-			ini_getInteger(iniFile, "Skin4", GSkin[i][3]);
-			ini_getInteger(iniFile, "Skin5", GSkin[i][4]);
-			ini_getInteger(iniFile, "Skin6", GSkin[i][5]);
-			ini_getInteger(iniFile, "Tag", GTag[i]);
+			ini_getString(iniFile, "Name", GangName[i]);
+			ini_getString(iniFile, "Color", GangColor[i]);
+			ini_getInteger(iniFile, "Check", GangCheck[i]);
+			ini_getInteger(iniFile, "Money", GangMoney[i]);
+			ini_getInteger(iniFile, "DMPoints", GangDmPoints[i]);
+			ini_getInteger(iniFile, "SpawnInt", GangSpawnInt[i]);
+			ini_getFloat(iniFile, "SpawnX", GangSpawn[i][0]);
+			ini_getFloat(iniFile, "SpawnY", GangSpawn[i][1]);
+			ini_getFloat(iniFile, "SpawnZ", GangSpawn[i][2]);
+			ini_getInteger(iniFile, "Skin1", GangSkin[i][0]);
+			ini_getInteger(iniFile, "Skin2", GangSkin[i][1]);
+			ini_getInteger(iniFile, "Skin3", GangSkin[i][2]);
+			ini_getInteger(iniFile, "Skin4", GangSkin[i][3]);
+			ini_getInteger(iniFile, "Skin5", GangSkin[i][4]);
+			ini_getInteger(iniFile, "Skin6", GangSkin[i][5]);
+			ini_getInteger(iniFile, "Tag", GangTag[i]);
 			ini_closeFile(iniFile);
-			if(GSpawn[i][0] && GSpawn[i][1] && GSpawn[i][2])
+			if(GangSpawn[i][0] && GangSpawn[i][1] && GangSpawn[i][2])
 			{
-				format(string, sizeof string, "Респ банды .:: %s ::.", GName[i]);
-				GLabel[i] = Create3DTextLabel(string, COLOR_LIME, GSpawn[i][0], GSpawn[i][1], GSpawn[i][2], 15.0, 0, 0);
-				GPick[i] = CreatePickup(1559, 1, GSpawn[i][0], GSpawn[i][1], GSpawn[i][2], -1);
+				format(string, sizeof string, "Респ банды .:: %s ::.", GangName[i]);
+				GangLabel[i] = Create3DTextLabel(string, COLOR_LIME, GangSpawn[i][0], GangSpawn[i][1], GangSpawn[i][2], 15.0, 0, 0);
+				GangPick[i] = CreatePickup(1559, 1, GangSpawn[i][0], GangSpawn[i][1], GangSpawn[i][2], -1);
 			}
 			else
 			{
-				GLabel[i] = Text3D:-1;
-				GPick[i] = -1;
+				GangLabel[i] = Text3D:-1;
+				GangPick[i] = -1;
 			}
 			Gang[i] = true;
 		}
@@ -9585,12 +9589,12 @@ DestroyGang(gangid)
 	static string[32];
 	format(string, sizeof string, "Gangs/%d.ini", gangid);
 	fremove(string);
-	GCheck[gangid] = 0;
-	GKills[gangid] = 0;
-	GMoney[gangid] = 0;
-	GDMPoints[gangid] = 0;
-	DestroyPickup(GPick[gangid]);
-	Delete3DTextLabel(GLabel[gangid]);
+	GangCheck[gangid] = 0;
+	GangKills[gangid] = 0;
+	GangMoney[gangid] = 0;
+	GangDmPoints[gangid] = 0;
+	DestroyPickup(GangPick[gangid]);
+	Delete3DTextLabel(GangLabel[gangid]);
 	for(i = GetPlayerPoolSize(); i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][pGang] == gangid)
@@ -9601,15 +9605,15 @@ DestroyGang(gangid)
 			SetPlayerHealth(i, 0.0);
 		}
 	}
-	for(i = sizeof(GSkin[]) - 1; i >= 0; --i) GSkin[gangid][i] = -1;
-	for(i = sizeof(GSpawn[]) - 1; i >= 0; --i) GSpawn[gangid][i] = 0.0;
-	GLabel[gangid] = Text3D:-1;
-	GColor[gangid][0] = EOS;
-	GName[gangid][0] = EOS;
-	GSpawnInt[gangid] = 0;
+	for(i = sizeof(GangSkin[]) - 1; i >= 0; --i) GangSkin[gangid][i] = -1;
+	for(i = sizeof(GangSpawn[]) - 1; i >= 0; --i) GangSpawn[gangid][i] = 0.0;
+	GangLabel[gangid] = Text3D:-1;
+	GangColor[gangid][0] = EOS;
+	GangName[gangid][0] = EOS;
+	GangSpawnInt[gangid] = 0;
 	Gang[gangid] = false;
-	GTag[gangid] = true;
-	GPick[gangid] = -1;
+	GangTag[gangid] = true;
+	GangPick[gangid] = -1;
 	return 1;
 }
 
@@ -9679,7 +9683,7 @@ StopLoopingAnim(playerid)
 
 PreloadAnimLib(playerid, animlib[]) ApplyAnimation(playerid, animlib, "null", 0.0, 0, 0, 0, 0, 0);
 
-GetPlayerSpeed(playerid, bool:speed3d)
+GetPlayerSpeed(playerid, bool:speed3d = true)
 {
 	new Float:pX, Float:pY, Float:pZ;
 	if(IsPlayerInAnyVehicle(playerid)) GetVehicleVelocity(GetPlayerVehicleID(playerid), pX, pY, pZ);
@@ -9724,10 +9728,10 @@ SendClientMessageToTeam(teamid, color, const message[])
 	return 1;
 }
 
-Camera(playerid, Float:X, Float:Y, Float:Z, Float:A, Float:Mul)
+SetCamera(playerid, Float:X, Float:Y, Float:Z, Float:angle, Float:dist)
 {
 	SetPlayerCameraLookAt(playerid, X, Y, Z);
-	return SetPlayerCameraPos(playerid, X + (Mul * floatsin(-A, degrees)), Y + (Mul * floatcos(-A, degrees)), Z + 6.0);
+	return SetPlayerCameraPos(playerid, X + (dist * floatsin(-angle, degrees)), Y + (dist * floatcos(-angle, degrees)), Z + 6.0);
 }
 
 IsACar(vehicleid)
