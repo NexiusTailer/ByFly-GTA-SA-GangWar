@@ -1,6 +1,6 @@
 ﻿[Download latest release (r16)](https://github.com/NexiusTailer/ByFly-GTA-SA-GangWar/tree/master/gamemodes)
 
-# ByFly GTA: SA GangWar - A TDM GameMode
+# ByFly GTA: SA GangWar
 
 ###### This gamemode in Russian.
 
