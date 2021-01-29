@@ -110,5 +110,3 @@ Magic_York, Andrew_York, TheHero, HeavenX, Eduard_Stream, Zoopi, Unisheld, Kaill
 * L Admin by LethaL
 
 За основу был взят мод Los Santos Gang Wars by LethaL
-
-Удачи!
