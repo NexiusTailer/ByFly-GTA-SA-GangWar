@@ -5,7 +5,8 @@
 	"output": "gamemodes/GangWar.amx",
 	"include_path": "pawno/include",
 	"local": true,
-	"runtime": {
+	"runtime":
+	{
 		"lanmode": true,
 		"rcon_password": "genius",
 		"maxplayers": 100,
