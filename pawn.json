@@ -2,5 +2,6 @@
 	"user": "NexiusTailer",
 	"repo": "ByFly-GTA-SA-GangWar",
 	"entry": "gamemodes/GangWar.pwn",
-	"output": "gamemodes/GangWar.amx"
+	"output": "gamemodes/GangWar.amx",
+	"local": true
 }
