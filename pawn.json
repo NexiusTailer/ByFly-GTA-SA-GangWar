@@ -3,8 +3,15 @@
 	"repo": "ByFly-GTA-SA-GangWar",
 	"entry": "gamemodes/GangWar.pwn",
 	"output": "gamemodes/GangWar.amx",
-	"include_path": "pawno/include",
 	"local": true,
+	"build":
+	{
+		"includes": ["pawno/include"],
+		"compiler":
+		{
+			"version": "3.10.8"
+		}
+	},
 	"runtime":
 	{
 		"lanmode": true,
