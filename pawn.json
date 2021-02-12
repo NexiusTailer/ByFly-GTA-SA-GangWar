@@ -3,5 +3,6 @@
 	"repo": "ByFly-GTA-SA-GangWar",
 	"entry": "gamemodes/GangWar.pwn",
 	"output": "gamemodes/GangWar.amx",
+	"include_path": "pawno/include",
 	"local": true
 }
