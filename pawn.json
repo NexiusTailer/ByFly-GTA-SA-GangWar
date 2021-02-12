@@ -12,10 +12,6 @@
 		"port": 7777,
 		"hostname": "ByFly GTA: SA GangWar server",
 		"gamemodes": ["GangWar"],
-		"onfootrate": 40,
-		"incarrate": 40,
-		"weaponrate": 40,
-		"streamdistance": 300.0,
 		"language": "Russian"
 	}
 }
