@@ -1,6 +1,6 @@
 ﻿# ByFly GTA: SA GangWar
 
-###### This gamemode in Russian.
+**This gamemode in Russian.**
 
 Рад представить вам возрождение мода ByFly GTA: SA GangWar.
 
