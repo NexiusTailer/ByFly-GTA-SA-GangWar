@@ -1,4 +1,4 @@
-﻿# ByFly GTA: SA GangWar
+# ByFly GTA: SA GangWar
 
 **This gamemode in Russian.**
 
