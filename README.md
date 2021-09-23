@@ -86,7 +86,7 @@
 Все нужные библиотеки в архиве с модом.
 
 ## Установка
-1. Распакуйте скачанный архив из секции [Releases](https://github.com/NexiusTailer/ByFly-GTA-SA-GangWar/releases)
+1. Распакуйте скачанный архив из "[Releases](https://github.com/NexiusTailer/ByFly-GTA-SA-GangWar/releases)" секции
 2. В server.crg измените значение maxplayers на нужное вам количество игроков
 3. В GangWar.pwn (в самом начале) измените значение MAX_PLAYERS на нужное вам количество игроков
 4. Запустите сервер, зайдите на него и зарегистрируйтесь, потом выйдите
