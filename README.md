@@ -2,6 +2,7 @@
 
 **This gamemode in Russian.**
 
+Недолго думая я взялся делать мод в жанре TDM: копию мода того сервера, на котором я начинал играть.  
 Рад представить вам возрождение мода ByFly GTA: SA GangWar.
 
 ## Важные примечания
@@ -78,10 +79,21 @@
 * Anti-Swear
 * Anti-Flood
 
+## Скриншоты
+* [Система PVP](http://imgur.com/a/nWwTe)
+* [Система гонок](http://imgur.com/a/TYsF0)
+* [Система банд](http://imgur.com/a/6mwan)
+* [Система DM-зон](http://imgur.com/a/yFi0P)
+* [Система захвата территорий](http://imgur.com/a/abV9o)
+* [Другое](http://imgur.com/a/FMTuu)
+
+## Обзор
+https://youtube.com/watch?v=OO5IgK_6q_w
+
 ## Зависимости
 Для работы мода требуются:
-* [mxINI](https://github.com/Open-GTO/mxINI)
-* [GetVehicleColor](https://pastebin.com/4mvRGwiy)
+1. [mxINI](https://github.com/Open-GTO/mxINI)
+2. [GetVehicleColor](https://pastebin.com/4mvRGwiy)
 
 Все нужные библиотеки в архиве с модом.
 
