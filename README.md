@@ -80,12 +80,12 @@
 * Anti-Flood
 
 ## Скриншоты
-* [Система PVP](http://imgur.com/a/nWwTe)
-* [Система гонок](http://imgur.com/a/TYsF0)
-* [Система банд](http://imgur.com/a/6mwan)
-* [Система DM-зон](http://imgur.com/a/yFi0P)
-* [Система захвата территорий](http://imgur.com/a/abV9o)
-* [Другое](http://imgur.com/a/FMTuu)
+* [Система PVP](https://imgur.com/a/nWwTe)
+* [Система гонок](https://imgur.com/a/TYsF0)
+* [Система банд](https://imgur.com/a/6mwan)
+* [Система DM-зон](https://imgur.com/a/yFi0P)
+* [Система захвата территорий](https://imgur.com/a/abV9o)
+* [Другое](https://imgur.com/a/FMTuu)
 
 ## Обзор
 https://youtube.com/watch?v=OO5IgK_6q_w
