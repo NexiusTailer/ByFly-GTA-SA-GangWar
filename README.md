@@ -93,7 +93,7 @@ https://youtube.com/watch?v=OO5IgK_6q_w
 ## Зависимости
 Для работы мода требуются:
 1. [mxINI](https://github.com/Open-GTO/mxINI)
-2. [GetVehicleColor](https://pastebin.com/4mvRGwiy)
+2. [GetVehicleColor](https://pastebin.com/CS5X1C96)
 
 Все нужные библиотеки в архиве с модом.
 
