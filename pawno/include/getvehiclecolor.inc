@@ -1,6 +1,6 @@
 /*
 	SA-MP "GetVehicleColor v2.1" Include
-	Copyright © 2011 RyDeR`
+	Copyright В© 2011 RyDeR`
 */
 
 #if defined _Included_GetVehicleColor
