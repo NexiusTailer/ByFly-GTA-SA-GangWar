@@ -88,7 +88,7 @@
 * [Другое](https://imgur.com/a/FMTuu)
 
 ## Обзор
-https://youtube.com/watch?v=OO5IgK_6q_w
+[Обзор модов #9 | ByFly GTA SA GangWar](https://youtube.com/watch?v=OO5IgK_6q_w)
 
 ## Зависимости
 Для работы мода требуются:
