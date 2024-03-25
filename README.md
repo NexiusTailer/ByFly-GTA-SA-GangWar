@@ -110,7 +110,7 @@ Magic_York, Andrew_York, TheHero, HeavenX, Eduard_Stream, Zoopi, Unisheld, Kaill
 
 ## Использовались работы
 * Vip Island by SiNoK
-* [Mine](https://sampforum.blast.hk/showthread.php?tid=247928) by Apec
+* [Mine](https://sampforum.blast.hk/showthread.php?tid=247928) by Games and Apec
 * [rRace](https://sampforum.blast.hk/showthread.php?tid=143764) by Ryder
 * [Hot air balloon](https://sampforum.blast.hk/showthread.php?tid=293843) by adri1
 * [Teleport menu](https://sampforum.blast.hk/showthread.php?tid=250248) by captainjohn
