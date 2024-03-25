@@ -110,13 +110,13 @@ Magic_York, Andrew_York, TheHero, HeavenX, Eduard_Stream, Zoopi, Unisheld, Kaill
 
 ## Использовались работы
 * Vip Island by SiNoK
-* Mine by Apec
-* rRace by Ryder
-* Hot air balloon by adri1
-* Teleport menu by captainjohn
-* Chow's Chinese Restaurant by GrimmjowJJ
-* GangSystem by _TeraN_(ZakMage, modifed by Jekson and ARH[I]VIRUS
-* Ultimate Vehicle Tuning Filescript by Antonio144
-* L Admin by LethaL
+* [Mine](https://sampforum.blast.hk/showthread.php?tid=247928) by Apec
+* [rRace](https://sampforum.blast.hk/showthread.php?tid=143764) by Ryder
+* [Hot air balloon](https://sampforum.blast.hk/showthread.php?tid=293843) by adri1
+* [Teleport menu](https://sampforum.blast.hk/showthread.php?tid=250248) by captainjohn
+* [Chow's Chinese Restaurant](https://sampforum.blast.hk/showthread.php?tid=246223) by GrimmjowJJ
+* GangSystem by \_TeraN\_(ZakMage), modifed by Jekson and ARH[I]VIRUS
+* [Ultimate Vehicle Tuning Filescript](https://sampforum.blast.hk/showthread.php?tid=253908) by Antonio144
+* [L Admin](https://sampforum.blast.hk/showthread.php?tid=19819) by LethaL
 
-За основу был взят мод Los Santos Gang Wars by LethaL
+За основу был взят мод [Los Santos Gang Wars](https://sampforum.blast.hk/showthread.php?tid=17866) by LethaL
