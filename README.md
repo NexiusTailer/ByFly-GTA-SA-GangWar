@@ -60,24 +60,26 @@
 * Vip-остров (/vip)
 
 ## Античиты
-<details><summary>Самые основные на мой взгляд:</summary>
-* Anti-Dialog Crasher
-* Anti-Bullet Crasher
-* Anti-Advertising
-* Anti-Weapon Hack
-* Anti-Tuning Hack
-* Anti-Dialog Hack
-* Anti-High ping
-* Anti-Money Hack
-* Anti-Spawn kill
-* Anti-Rcon Hack
-* Anti-SpeedHack
-* Anti-SandBox
-* Anti-FlyHack
-* Anti-DriveBy
-* Anti-C bug
-* Anti-Swear
-* Anti-Flood
+<details>
+  <summary>Самые основные на мой взгляд</summary>
+
+  * Anti-Dialog Crasher
+  * Anti-Bullet Crasher
+  * Anti-Advertising
+  * Anti-Weapon Hack
+  * Anti-Tuning Hack
+  * Anti-Dialog Hack
+  * Anti-High ping
+  * Anti-Money Hack
+  * Anti-Spawn kill
+  * Anti-Rcon Hack
+  * Anti-SpeedHack
+  * Anti-SandBox
+  * Anti-FlyHack
+  * Anti-DriveBy
+  * Anti-C bug
+  * Anti-Swear
+  * Anti-Flood
 </details>
 
 ## Скриншоты
