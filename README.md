@@ -60,7 +60,7 @@
 * Vip-остров (/vip)
 
 ## Античиты
-Самые основные на мой взгляд:
+<details><summary>Самые основные на мой взгляд:</summary>
 * Anti-Dialog Crasher
 * Anti-Bullet Crasher
 * Anti-Advertising
@@ -78,6 +78,7 @@
 * Anti-C bug
 * Anti-Swear
 * Anti-Flood
+</details>
 
 ## Скриншоты
 * [Система PVP](https://imgur.com/a/nWwTe)
