@@ -908,7 +908,7 @@ gw_ShowPlayerDialog(playerid, dialogid, type, header[], text[], button1[], butto
 
 gw_SetPlayerVirtualWorld(playerid, worldid)
 {
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][pSpec] == playerid) SetPlayerVirtualWorld(i, worldid);
 	}
@@ -2015,7 +2015,7 @@ public OnGameModeInit()
 public OnGameModeExit()
 {
 	new i;
-	for(i = GetPlayerPoolSize(); i >= 0; --i)
+	for(i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i))
 		{
@@ -2192,7 +2192,7 @@ public OnPlayerDisconnect(playerid, reason)
 	if(PlayerInfo[playerid][pInPvp])
 	{
 		PvpPlaceVisit[PlayerInfo[playerid][pPvpPlace]] = false;
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i) && PlayerInfo[i][pInPvp] && PlayerInfo[i][pPvpPlace] == PlayerInfo[playerid][pPvpPlace])
 			{
@@ -3136,7 +3136,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 		PlayerInfo[playerid][pMoney] -= PlayerInfo[playerid][pPvpMoney];
 		format(string, sizeof string, "~r~-%d$", PlayerInfo[playerid][pPvpMoney]);
 		GameTextForPlayer(playerid, string, 1000, 1);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i) && PlayerInfo[i][pInPvp] && PlayerInfo[i][pPvpPlace] == PlayerInfo[playerid][pPvpPlace])
 			{
@@ -3157,7 +3157,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 
 public OnPlayerInteriorChange(playerid, newinteriorid, oldinteriorid)
 {
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][pSpec] == playerid) SetPlayerInterior(i, newinteriorid);
 	}
@@ -3857,7 +3857,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(EarsIsEnabled)
 		{
 			format(string, sizeof string, "PM от %s(%d) для %s(%d): %s", PlayerInfo[playerid][pName], playerid, PlayerInfo[player][pName], player, cmdtext[pos]);
-			for(new i = GetPlayerPoolSize(); i >= 0; --i)
+			for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 			{
 				if(IsPlayerConnected(i) && IsPlayerAdminEx(i, 10)) SendClientMessage(i, COLOR_YELLOW, string);
 			}
@@ -4166,7 +4166,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(!IsPlayerAdminEx(playerid, 1)) return SendClientMessage(playerid, COLOR_RED, "Вы не являетесь администратором!");
 		static string2[256];
 		string2[0] = EOS;
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i) && IsPlayerAdminEx(i, 1))
 			{
@@ -4996,7 +4996,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(!(0 <= time <= 23)) return SendClientMessage(playerid, COLOR_RED, "Указанный параметр должен быть от 0 до 23!");
 		format(string, sizeof string, "Админ %s сменил время", PlayerInfo[playerid][pName]);
 		SendClientMessageToAll(COLOR_BLUE, string);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i) SetPlayerTime(i, time, 0);
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i) SetPlayerTime(i, time, 0);
 		PlaySoundForAll(1057, 0.0, 0.0, 0.0);
 		return 1;
 	}
@@ -5009,7 +5009,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(!(0 <= weather <= 20)) return SendClientMessage(playerid, COLOR_RED, "Указанный параметр должен быть от 0 до 20!");
 		format(string, sizeof string, "Админ %s сменил погоду", PlayerInfo[playerid][pName]);
 		SendClientMessageToAll(COLOR_BLUE, string);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i) SetPlayerWeather(i, weather);
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i) SetPlayerWeather(i, weather);
 		PlaySoundForAll(1057, 0.0, 0.0, 0.0);
 		return 1;
 	}
@@ -5029,7 +5029,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		if(!IsPlayerAdminEx(playerid, 8)) return SendClientMessage(playerid, COLOR_RED, "Вы не уполномочены использовать эту команду!");
 		new Float:x, Float:y, Float:z;
 		GetPlayerPos(playerid, x, y, z);
-		for(new i = GetPlayerPoolSize(), interior = GetPlayerInterior(playerid), vw = GetPlayerVirtualWorld(playerid); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1, interior = GetPlayerInterior(playerid), vw = GetPlayerVirtualWorld(playerid); i >= 0; --i)
 		{
 			if(IsPlayerConnected(i) && i != playerid)
 			{
@@ -5051,7 +5051,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		format(string, sizeof string, "Админ %s установил всем виртуальный мир на %d", PlayerInfo[playerid][pName], vw);
 		SendClientMessageToAll(COLOR_BLUE, string);
 		PlaySoundForAll(1057, 0.0, 0.0, 0.0);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i)) SetPlayerVirtualWorld(i, vw);
 		}
@@ -5066,7 +5066,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		format(string, sizeof string, "Админ %s установил всем интерьер на %d", PlayerInfo[playerid][pName], interior);
 		SendClientMessageToAll(COLOR_BLUE, string);
 		PlaySoundForAll(1057, 0.0, 0.0, 0.0);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i)) SetPlayerInterior(i, interior);
 		}
@@ -5086,7 +5086,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		printf("Админ %s выдал всем игрокам %s с %d патронами", PlayerInfo[playerid][pName], wname, ammo);
 		format(string, sizeof string, "Админ %s дал всем игрокам %s (ID:%d) с %d патронами", PlayerInfo[playerid][pName], wname, weapon, ammo);
 		SendClientMessageToAll(COLOR_BLUE, string);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i)) GivePlayerWeapon(i, weapon, ammo);
 		}
@@ -5098,7 +5098,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		format(string, sizeof string, "Админ %s вылечил всех", PlayerInfo[playerid][pName]);
 		SendClientMessageToAll(COLOR_BLUE, string);
 		PlaySoundForAll(1057, 0.0, 0.0, 0.0);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i)) SetPlayerHealth(i, 100.0);
 		}
@@ -5110,7 +5110,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		format(string, sizeof string, "Админ %s выдал всем броню", PlayerInfo[playerid][pName]);
 		SendClientMessageToAll(COLOR_BLUE, string);
 		PlaySoundForAll(1057, 0.0, 0.0, 0.0);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i)) SetPlayerArmour(i, 100.0);
 		}
@@ -5122,7 +5122,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		SendClientMessage(playerid, COLOR_BLUE, "Вы убили всех игроков");
 		printf("Админ %s убил всех игроков", PlayerInfo[playerid][pName]);
 		format(string, sizeof string, "Администратор %s убил вас", PlayerInfo[playerid][pName]);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i) && i != playerid)
 			{
@@ -5139,7 +5139,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		SendClientMessage(playerid, COLOR_BLUE, "Вы заморозили всех игроков");
 		printf("Админ %s заморозил всех игроков", PlayerInfo[playerid][pName]);
 		format(string, sizeof string, "Администратор %s заморозил вас", PlayerInfo[playerid][pName]);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i) && i != playerid)
 			{
@@ -5156,7 +5156,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		SendClientMessage(playerid, COLOR_BLUE, "Вы разморозили всех игроков");
 		printf("Админ %s разморозил всех игроков", PlayerInfo[playerid][pName]);
 		format(string, sizeof string, "Администратор %s разморозил вас", PlayerInfo[playerid][pName]);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i) && i != playerid)
 			{
@@ -5173,7 +5173,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		SendClientMessage(playerid, COLOR_BLUE, "Вы выкинули из авто всех игроков");
 		printf("Админ %s выкинул из авто всех игроков", PlayerInfo[playerid][pName]);
 		format(string, sizeof string, "Администратор %s выкинул вас из авто", PlayerInfo[playerid][pName]);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i) && i != playerid)
 			{
@@ -5190,7 +5190,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		SendClientMessage(playerid, COLOR_BLUE, "Вы обезоружили всех игроков");
 		printf("Админ %s обезоружил всех игроков", PlayerInfo[playerid][pName]);
 		format(string, sizeof string, "Администратор %s обезоружил ваc", PlayerInfo[playerid][pName]);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i) && i != playerid)
 			{
@@ -5211,7 +5211,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		format(string, sizeof string, "Админ %s установил всем $%d", PlayerInfo[playerid][pName], money);
 		SendClientMessageToAll(COLOR_BLUE, string);
 		PlaySoundForAll(1057, 0.0, 0.0, 0.0);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i)) PlayerInfo[i][pMoney] = money;
 		}
@@ -5227,7 +5227,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		format(string, sizeof string, "Админ %s дал всем $%d", PlayerInfo[playerid][pName], money);
 		SendClientMessageToAll(COLOR_BLUE, string);
 		PlaySoundForAll(1057, 0.0, 0.0, 0.0);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i)) PlayerInfo[i][pMoney] += money;
 		}
@@ -5315,7 +5315,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		printf("Админ %s кикнул всех игроков", PlayerInfo[playerid][pName]);
 		format(string, sizeof string, "Администратор %s кикнул всех игроков. Причина: %s", PlayerInfo[playerid][pName], cmdtext[9]);
 		SendClientMessageToAll(COLOR_BORDO, string);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i) && i != playerid) Kick2(i);
 		}
@@ -5331,7 +5331,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 		format(string, sizeof string, "Админ %s установил всем %d очков", PlayerInfo[playerid][pName], score);
 		SendClientMessageToAll(COLOR_BLUE, string);
 		PlaySoundForAll(1057, 0.0, 0.0, 0.0);
-		for(new i = GetPlayerPoolSize(); i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i))
 			{
@@ -5484,7 +5484,7 @@ public OnPlayerUpdate(playerid)
 	{
 		new vid = GetPlayerVehicleID(playerid), panels, doors, lights, tires;
 		GetVehicleDamageStatus(vid, panels, doors, lights, tires);
-		for(new i = GetPlayerPoolSize(), Float:sx, Float:sy, Float:sz; i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1, Float:sx, Float:sy, Float:sz; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i) && PlayerInfo[i][pSpikesObj] > 0)
 			{
@@ -5508,7 +5508,7 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 	{
 		case PLAYER_STATE_ONFOOT:
 		{
-			for(new i = GetPlayerPoolSize(); i >= 0; --i)
+			for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 			{
 				if(IsPlayerConnected(i) && PlayerInfo[i][pSpec] == playerid) PlayerSpectatePlayer(i, playerid);
 			}
@@ -5517,7 +5517,7 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 		case PLAYER_STATE_DRIVER:
 		{
 			new vehid = GetPlayerVehicleID(playerid);
-			for(new i = GetPlayerPoolSize(); i >= 0; --i)
+			for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 			{
 				if(IsPlayerConnected(i) && PlayerInfo[i][pSpec] == playerid) PlayerSpectateVehicle(i, vehid);
 			}
@@ -5551,7 +5551,7 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 		case PLAYER_STATE_PASSENGER:
 		{
 			new vehid = GetPlayerVehicleID(playerid);
-			for(new i = GetPlayerPoolSize(); i >= 0; --i)
+			for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 			{
 				if(IsPlayerConnected(i) && PlayerInfo[i][pSpec] == playerid) PlayerSpectateVehicle(i, vehid);
 			}
@@ -7339,7 +7339,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					format(string, sizeof string, "Скин успешно установлен! ID скина: %d", skin);
 					SendClientMessage(playerid, COLOR_YELLOW_2, string);
 					GangSkin[PlayerInfo[playerid][pGang]][PlayerInfo[playerid][pGangSkin] - 1] = skin;
-					for(new i = GetPlayerPoolSize(); i >= 0; --i)
+					for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 					{
 						if(IsPlayerConnected(i) && PlayerInfo[i][pGang] == PlayerInfo[playerid][pGang] && PlayerInfo[i][pGangLvl] == PlayerInfo[playerid][pGangSkin]) SetPlayerSkin(i, skin);
 					}
@@ -7369,7 +7369,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			if(response)
 			{
 				format(string, sizeof string, "{FFFF00}'{FFFFFF}%s{FFFF00}' ушёл из банды!", PlayerInfo[playerid][pName]);
-				for(new i = GetPlayerPoolSize(); i >= 0; --i)
+				for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 				{
 					if(IsPlayerConnected(i) && PlayerInfo[i][pGang] == PlayerInfo[playerid][pGang] && i != playerid) SendClientMessage(i, COLOR_YELLOW_2, string);
 				}
@@ -7818,7 +7818,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					{
 						static string2[256];
 						string2[0] = EOS;
-						for(new i = GetPlayerPoolSize(); i >= 0; --i)
+						for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 						{
 							if(IsPlayerConnected(i) && PlayerInfo[playerid][pGangId] == PlayerInfo[i][pGang])
 							{
@@ -7871,7 +7871,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				if(gleader == INVALID_PLAYER_ID) return SendClientMessage(playerid, COLOR_RED_GANG, "Лидер противоположной банды вышел.");
 				new Float:pX, Float:pY, Float:pZ, pInt = GetPlayerInterior(gleader), pVw = GetPlayerVirtualWorld(gleader);
 				GetPlayerPos(gleader, pX, pY, pZ);
-				for(new i = GetPlayerPoolSize(); i >= 0; --i)
+				for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 				{
 					if(IsPlayerConnected(i) && i != gleader && (PlayerInfo[i][pGang] == PlayerInfo[playerid][pGang] || PlayerInfo[i][pGang] == PlayerInfo[playerid][pBattleId]))
 					{
@@ -8291,7 +8291,7 @@ public OnPlayerPickUpPickup(playerid, pickupid)
 		SetPlayerInterior(playerid, 0);
 		return 1;
 	}
-	for(new i = GetPlayerPoolSize(), Float:X, Float:Y, Float:Z; i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1, Float:X, Float:Y, Float:Z; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][pMineStatus] > 0 && PlayerInfo[i][pMinePick] == pickupid)
 		{
@@ -8312,7 +8312,7 @@ public OnRconLoginAttempt(ip[], password[], success)
 {
 	if(!success)
 	{
-		for(new i = GetPlayerPoolSize(), ips[16]; i >= 0; --i)
+		for(new i = MAX_PLAYERS - 1, ips[16]; i >= 0; --i)
 		{
 			if(IsPlayerConnected(i))
 			{
@@ -8763,7 +8763,7 @@ fpublic CountTillRace()
 	{
 		case 0:
 		{
-			for(new i = GetPlayerPoolSize(); i >= 0; --i)
+			for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 			{
 				if(IsPlayerConnected(i) && !PlayerInfo[i][pInRace]) SendClientMessage(i, COLOR_YELLOW, "RACE: Гонка началась!");
 			}
@@ -8772,7 +8772,7 @@ fpublic CountTillRace()
 		case 1..5:
 		{
 			format(string, sizeof string, "~b~%d", RaceCountAmount);
-			for(new i = GetPlayerPoolSize(); i >= 0; --i)
+			for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 			{
 				if(IsPlayerConnected(i) && PlayerInfo[i][pInRace])
 				{
@@ -8799,7 +8799,7 @@ fpublic PayDay(playerid)
 
 fpublic SaveAccounts()
 {
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && SaveAccount(i)) SendClientMessage(i, COLOR_SPRINGGREEN, "Данные аккаунта обновлены!");
 	}
@@ -8877,7 +8877,7 @@ fpublic RandomMessages()
 
 fpublic Speedometer()
 {
-	for(new i = GetPlayerPoolSize(), string[16]; i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1, string[16]; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i))
 		{
@@ -8893,7 +8893,7 @@ fpublic UpdateTimer()
 	gettime(gHour, gMinute, gSecond);
 	format(TimeStr, sizeof TimeStr, "%02d:%02d:%02d", gHour, gMinute, gSecond);
 	TextDrawSetString(TDTime, TimeStr);
-	for(new i = GetPlayerPoolSize(), string[145], string2[32], temp; i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1, string[145], string2[32], temp; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i))
 		{
@@ -9412,7 +9412,7 @@ LoadRaceNames()
 
 StartRace()
 {
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][pInRace])
 		{
@@ -9439,7 +9439,7 @@ StopRace()
 	RaceJoinCount = 0;
 	RaceFinishCount = 0;
 	RaceTimeProgress = 0;
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][pInRace]) StopPlayerRace(i);
 	}
@@ -9595,7 +9595,7 @@ DestroyGang(gangid)
 	GangDmPoints[gangid] = 0;
 	DestroyPickup(GangPick[gangid]);
 	Delete3DTextLabel(GangLabel[gangid]);
-	for(i = GetPlayerPoolSize(); i >= 0; --i)
+	for(i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][pGang] == gangid)
 		{
@@ -9628,7 +9628,7 @@ GetFreeGang()
 
 GetGangLeader(gangid)
 {
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][pGang] == gangid && PlayerInfo[i][pGangLvl] == 6) return i;
 	}
@@ -9637,7 +9637,7 @@ GetGangLeader(gangid)
 
 PlaySoundForAll(soundid, Float:x, Float:y, Float:z)
 {
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i)) PlayerPlaySound(i, soundid, x, y, z);
 	}
@@ -9646,7 +9646,7 @@ PlaySoundForAll(soundid, Float:x, Float:y, Float:z)
 
 PlaySoundForPlayersInRange(soundid, Float:range, Float:x, Float:y, Float:z)
 {
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && IsPlayerInRangeOfPoint(i, range, x, y, z)) PlayerPlaySound(i, soundid, x, y, z);
 	}
@@ -9694,7 +9694,7 @@ GetPlayerSpeed(playerid, bool:speed3d = true)
 
 SendClientMessageToAdmins(color, const message[])
 {
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && IsPlayerAdminEx(i, 1)) SendClientMessage(i, color, message);
 	}
@@ -9703,7 +9703,7 @@ SendClientMessageToAdmins(color, const message[])
 
 SendClientMessageWithoutPlayer(playerid, color, const message[])
 {
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && i != playerid) SendClientMessage(i, color, message);
 	}
@@ -9712,7 +9712,7 @@ SendClientMessageWithoutPlayer(playerid, color, const message[])
 
 SendClientMessageToGang(gangid, color, const message[])
 {
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][pGang] == gangid) SendClientMessage(i, color, message);
 	}
@@ -9721,7 +9721,7 @@ SendClientMessageToGang(gangid, color, const message[])
 
 SendClientMessageToTeam(teamid, color, const message[])
 {
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i) && PlayerInfo[i][pTeam] == teamid) SendClientMessage(i, color, message);
 	}
@@ -9806,7 +9806,7 @@ GetNumberOfPlayersOnThisIP(const test_ip[])
 {
 	new ip_count;
 	static against_ip[16];
-	for(new i = GetPlayerPoolSize(); i >= 0; --i)
+	for(new i = MAX_PLAYERS - 1; i >= 0; --i)
 	{
 		if(IsPlayerConnected(i))
 		{
